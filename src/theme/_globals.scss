@@ -1,0 +1,14 @@
+@mixin font {
+    font-family: 'Assistant', sans-serif;
+}
+
+/**
+ * Centering elements
+ * @use '../../../theme/theme' as theme;
+ * @include theme.centerflex;
+ */
+@mixin centerflex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

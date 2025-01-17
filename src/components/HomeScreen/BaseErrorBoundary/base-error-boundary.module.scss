@@ -1,0 +1,16 @@
+@use '../../theme/theme' as theme;
+
+.container {
+    height: 100%;
+    background-color: theme.$error;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    svg {
+        font-size: 2rem;
+    }
+}
