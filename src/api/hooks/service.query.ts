@@ -2,43 +2,48 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { QueryConfig } from '../config/query.types.ts';
 
 /**
- * Custom hook to use a query for the user service
- * @param key
- * @param args
+ * A generic React Query hook to execute service methods with type safety.
+ *
+ * This hook dynamically resolves a method from the given service object
+ * and executes it with the provided arguments, leveraging React Query for caching
+ * and state management.
+ *
+ * @template TService - The type of the service object containing the methods.
+ * @template K - The key of the method in the service to be called.
+ *
+ * @param {TService} service - The service object containing the methods.
+ * @param {K} key - The method name (key) in the service to execute.
+ * @param {...QueryConfig<TService>[K]['args']} args - The arguments to pass to the selected service method.
+ *
+ * @returns {UseQueryResult<QueryConfig<TService>[K]['returnType'], unknown>}
+ * React Query result object containing the method's return value or error.
+ *
  * @example
- * ```tsx
- * // Get all users
- *  const { data: users } = useUserQuery('getUsers');
+ * // Usage with UsersService
+ * import { UsersService } from '../services/users.service';
+ * import { useQueryService } from '../hooks/useQueryService';
  *
- *   // Get a user by ID
- *   const { data: user } = useUserQuery('getUserById', 'user-id-123');
+ * const { data: users } = useQueryService(UsersService, 'getUsers'); // Get all users
  *
- *   // Create a user
- *   const { data: newUser } = useUserQuery('createUser', {
- *     name: 'John Doe',
- *     email: 'john@example.com',
- *   });
+ * const { data: user } = useQueryService(UsersService, 'getUserById', 'user-id-123'); // Get a user by ID
  *
- *   // Update a user
- *   const { data: updatedUser } = useUserQuery('updateUser', 'user-id-123', {
- *     name: 'John Updated',
- *   });
+ * const { data: newUser } = useQueryService(UsersService, 'createUser', {
+ *   name: 'John Doe',
+ *   email: 'john@example.com',
+ * }); // Create a user
  *
- *   // Delete a user
- *   const { data: deletedUserId } = useUserQuery('deleteUser', 'user-id-123');
- *   ```
- */
-/**
- * Generic hook to use queries for any service
- * @param service - The service object
- * @param key - The method name in the service
- * @param args - Arguments for the selected method
+ * const { data: updatedUser } = useQueryService(
+ *   UsersService,
+ *   'updateUser',
+ *   'user-id-123',
+ *   { name: 'John Updated' }
+ * ); // Update a user
+ *
+ * const { data: deletedUserId } = useQueryService(UsersService, 'deleteUser', 'user-id-123'); // Delete a user
+ *
  * @example
- * ```tsx
- * // Using with UsersService
- * const { data: users } = useQueryService(UsersService, 'getUsers');
- * const { data: user } = useQueryService(UsersService, 'getUserById', 'user-id-123');
- * ```
+ * // Usage with other service (e.g., ProductsService)
+ * const { data: products } = useQueryService(ProductsService, 'getProducts'); // Get all products
  */
 export const useQueryService = <
     TService,
@@ -56,7 +61,7 @@ export const useQueryService = <
     };
 
     return useQuery<QueryConfig<TService>[K]['returnType'], unknown>({
-        queryKey: [key, ...args], // Include method name and args for cache invalidation
+        queryKey: [key, ...args], // Include method name and arguments for caching
         queryFn,
     });
 };

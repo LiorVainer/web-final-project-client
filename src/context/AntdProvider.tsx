@@ -1,16 +1,14 @@
-import React from 'react';
+import { PropsWithChildren } from 'react';
 import { ConfigProvider, ThemeConfig } from 'antd';
+import { ThemeColors } from '@theme/color.ts';
 
-export const AntdProvider: React.FC = ({ }) => {
-    const config: ThemeConfig = {
-        token: {
-            colorPrimary: '#1890ff',
-        },
-    };
+const config: ThemeConfig = {
+    token: {
+        colorPrimary: ThemeColors.action,
+    },
+};
 
-    return (
-        <ConfigProvider {...config}>
-            {children}
-        </ConfigProvider>
-    )
-}
+export const AntdProvider = ({ children }: PropsWithChildren<{}>) =>
+    <ConfigProvider theme={config}>
+        {children}
+    </ConfigProvider>;

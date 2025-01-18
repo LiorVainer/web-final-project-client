@@ -33,6 +33,7 @@ export default tseslint.config(
                 'warn',
                 { allowConstantExport: true },
             ],
+            "@typescript-eslint/no-unused-vars": ["warn", { "vars": "all", "args": "after-used", "ignoreRestSiblings": true }],
             'import/no-unresolved': [
                 'error',
                 {

@@ -2,8 +2,8 @@
 
 .container {
     height: 100%;
-    background-color: theme.$error;
-    color: white;
+    background-color: theme.$error-light;
+    color: theme.$error;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -12,5 +12,9 @@
 
     svg {
         font-size: 2rem;
+    }
+
+    button {
+        @include theme.base-button(theme.$error, white);
     }
 }
