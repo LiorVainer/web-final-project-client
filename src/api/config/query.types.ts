@@ -1,5 +1,5 @@
 type ServiceMethodArguments<T> = T extends (...args: infer A) => any ? A : never;
-type ServiceMethodReturn<T> = T extends (...args: any[]) => infer R ? R : never;
+export type ServiceMethodReturn<T> = T extends (...args: any[]) => infer R ? R : never;
 
 export type QueryConfig<TService> = {
     [K in keyof TService]: TService[K] extends (...args: any[]) => any

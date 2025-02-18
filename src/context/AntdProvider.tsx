@@ -8,7 +8,6 @@ const config: ThemeConfig = {
     },
 };
 
-export const AntdProvider = ({ children }: PropsWithChildren<{}>) =>
-    <ConfigProvider theme={config}>
-        {children}
-    </ConfigProvider>;
+export const AntdProvider = ({ children }: PropsWithChildren<{}>) => (
+    <ConfigProvider theme={config}>{children}</ConfigProvider>
+);

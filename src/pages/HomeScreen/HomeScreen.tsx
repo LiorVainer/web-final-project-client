@@ -6,14 +6,14 @@ import { Button } from 'antd';
 export interface HomeScreenProps {}
 
 export const HomeScreen = ({}: HomeScreenProps) => {
-    const { data, error, isLoading } = useQueryService(UsersService, 'getUsers')
+    const { data, error, isPending } = useQueryService({ service: UsersService, method: 'getUsers' });
 
     if (error) {
         console.error('Error', error);
         return <div>Error has occurred</div>;
     }
 
-    if (!data || isLoading) {
+    if (!data || isPending) {
         return <Button>Loading...</Button>;
     }
 
