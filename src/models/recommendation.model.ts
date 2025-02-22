@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { UserSchema } from '@/models/user.model.ts';
+import { MatchSchema } from '@/models/match.model.ts';
 
 const CommentSchema = z.object({
     _id: z.string(),
@@ -8,15 +10,21 @@ const CommentSchema = z.object({
     createdAt: z.date(),
 });
 
-const RecommendationSchema = z.object({
+export const RecommendationPayloadSchema = z.object({
     _id: z.string(),
     matchId: z.string(),
+    title: z.string(),
     description: z.string(),
     likes: z.array(z.string()),
-    comments: z.array(CommentSchema),
     pictureId: z.string().optional(),
+});
+
+export const RecommendationSchema = RecommendationPayloadSchema.omit({ matchId: true }).extend({
     createdAt: z.date(),
     updatedAt: z.date(),
+    createdBy: UserSchema.omit({ password: true }),
+    match: MatchSchema,
+    comments: z.array(CommentSchema),
 });
 
 export type Comment = z.infer<typeof CommentSchema>;
