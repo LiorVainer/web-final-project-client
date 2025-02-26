@@ -7,6 +7,7 @@ export const MatchSchema = z.object({
     date: z.date(),
     competition: z.string(),
     country: z.string(),
+    stadium: z.string(),
     createdAt: z.date(),
 });
 

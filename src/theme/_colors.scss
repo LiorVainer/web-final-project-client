@@ -6,9 +6,18 @@ $primary: hsl(0, 0%, 100%);
 
 $error: hsla(0, 84%, 20%, 1);
 $error-light: hsla(0, 84%, 85%, 1);
+$red: hsla(0, 84%, 50%, 1);
 
 @function gray-scale($lightness, $opacity: 1) {
-    @return hsla(0, 0%, $lightness * 1%, $opacity);
+    @return hsla(0, 0%, calc($lightness * 1%), $opacity);
+}
+
+@function darker($color, $amount) {
+    @return adjust-color($color, $lightness: -$amount);
+}
+
+@function lighter($color, $amount) {
+    @return adjust-color($color, $lightness: $amount);
 }
 
 :export {
