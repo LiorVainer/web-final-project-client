@@ -11,4 +11,6 @@ export const MatchSchema = z.object({
     createdAt: z.date(),
 });
 
+export const MatchPayloadSchema = MatchSchema.omit({ createdAt: true });
+
 export type Match = z.infer<typeof MatchSchema>;

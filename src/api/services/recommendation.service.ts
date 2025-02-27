@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { User } from '../../models/user.model';
 import { axiosInstance } from '../config/axios-instance';
-import { Recommendation, RecommendationPayloadSchema, RecommendationSchema } from '@/models/recommendation.model.ts';
+import { CreateRecommendationBody, Recommendation, RecommendationPayloadSchema, RecommendationSchema } from '@/models/recommendation.model.ts';
 
 export const ROUTE_PREFIX = '/recommendations';
 
@@ -44,7 +44,7 @@ export const RecommendationService = {
         }
     },
 
-    async createRecommendation(recommendationData: Recommendation) {
+    async createRecommendation(recommendationData: CreateRecommendationBody) {
         try {
             const response = await axiosInstance.post(ROUTE_PREFIX, recommendationData);
 

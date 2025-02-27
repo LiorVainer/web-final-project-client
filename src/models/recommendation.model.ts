@@ -27,5 +27,11 @@ export const RecommendationSchema = RecommendationPayloadSchema.omit({ matchId: 
     comments: z.array(CommentSchema),
 });
 
+export const CreateRecommendationSchema = RecommendationPayloadSchema.omit({ _id: true, likes: true }).extend({
+    createdBy: z.string(),
+});
+
 export type Comment = z.infer<typeof CommentSchema>;
 export type Recommendation = z.infer<typeof RecommendationSchema>;
+
+export type CreateRecommendationBody = z.infer<typeof CreateRecommendationSchema>;
