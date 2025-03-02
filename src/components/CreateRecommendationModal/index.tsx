@@ -61,6 +61,8 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
         });
         reset();
         setImageUrl(''); // Clear image preview
+        setMatchLabel('');
+        setSearchTerm('');
         onClose();
     };
 
@@ -103,13 +105,25 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
     };
 
     return (
-        <Modal title="Create Recommendation" open={isOpen} onCancel={onClose} footer={null} className={styles.modal}>
+        <Modal
+            title="Create Recommendation"
+            open={isOpen}
+            onCancel={() => {
+                reset();
+                setImageUrl(''); // Clear image preview
+                setMatchLabel('');
+                setSearchTerm('');
+                onClose();
+            }}
+            footer={null}
+            className={styles.modal}
+        >
             <Form layout="vertical" className={styles.form} onFinish={handleSubmit(onSubmit)}>
                 <Form.Item label="Match" validateStatus={errors.matchId ? 'error' : ''} help={errors.matchId?.message}>
                     <AutoComplete
                         options={matches.map((match: any) => ({
                             value: match.id, // The ID stored in the form
-                            label: `${match.name} - ${new Date(match.dates.start.dateTime).toLocaleDateString()}`, // What the user sees
+                            label: `${match.name} - ${new Date(match.dates.start.dateTime).toLocaleDateString()}` as string, // What the user sees
                         }))}
                         value={matchLabel} // Displayed value
                         onChange={(value) => {
@@ -117,7 +131,7 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
                         }}
                         onSelect={(value, option) => {
                             setValue('matchId', value); // Store match ID
-                            setMatchLabel(option.label); // Show selected match name
+                            setMatchLabel(option.label as string); // Show selected match name
                         }}
                         onSearch={debouncedSearch}
                         placeholder="Search for a match..."
