@@ -16,7 +16,7 @@ export const RecommendationPayloadSchema = z.object({
     title: z.string(),
     description: z.string(),
     likes: z.array(z.string()),
-    pictureId: z.string().optional(),
+    picture: z.string().optional(),
 });
 
 export const RecommendationSchema = RecommendationPayloadSchema.omit({ matchId: true }).extend({
