@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Modal, Form, Input, Button, AutoComplete, Upload, Spin, message } from 'antd';
+import { Modal, Form, Input, Button, AutoComplete, Upload, Spin, message, DatePicker } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -8,13 +8,19 @@ import { useQuery } from '@tanstack/react-query';
 import { debounce } from 'lodash';
 import styles from './CreateRecommendationModal.module.scss';
 import { RecommendationService } from '@/api/services/recommendation.service';
+import { MatchService } from '@/api/services/match.service';
 
 // Recommendation Schema with Yup validation
 const RecommendationSchema = Yup.object().shape({
-    matchId: Yup.string().required('Match is required'),
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
     description: Yup.string().min(10, 'Description is too short').required('Description is required'),
     picture: Yup.string().optional(),
+    country: Yup.string().required('Country is required'),
+    stadium: Yup.string().required('Stadium is required'),
+    league: Yup.string().required('League is required'),
+    homeTeam: Yup.string().required('Home Team is required'),
+    awayTeam: Yup.string().required('Away Team is required'),
+    date: Yup.date().required('Match date is required'),
 });
 
 type CreateRecommendationModalProps = {
@@ -24,22 +30,65 @@ type CreateRecommendationModalProps = {
 
 type CreateRecommendationModalValues = Yup.InferType<typeof RecommendationSchema>;
 
+const API_KEY = 'e859464540085b15535c5ed431595955';
+
 const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModalProps) => {
-    const [matchLabel, setMatchLabel] = useState<string>('');
-    const [searchTerm, setSearchTerm] = useState('');
     const [imageUrl, setImageUrl] = useState<string>('');
     const [uploading, setUploading] = useState(false);
+    const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedLeague, setSelectedLeague] = useState<number | undefined>();
 
-    // Fetch soccer matches using react-query
-    const { data: matches = [], isFetching } = useQuery({
-        queryKey: ['matches', searchTerm],
-        queryFn: () =>
-            fetch(
-                `https://app.ticketmaster.com/discovery/v2/events.json?apikey=uchG8sbaBH7wcW2lctJnPNQHu5XRXidC&classificationName=Soccer&keyword=${searchTerm}`
-            )
-                .then((res) => res.json())
-                .then((data) => data._embedded?.events || []),
-        enabled: searchTerm.length > 0,
+    // Fetch countries
+    const { data: countries = [] } = useQuery({
+        queryKey: ['countries'],
+        queryFn: async () => {
+            const res = await fetch(`https://v3.football.api-sports.io/countries`, {
+                headers: { 'x-apisports-key': API_KEY },
+            });
+            const data = await res.json();
+            return data.response;
+        },
+        enabled: !!isOpen,
+    });
+
+    // Fetch stadiums and leagues based on country
+    const { data: leagues = [] } = useQuery({
+        queryKey: ['leagues', selectedCountry],
+        queryFn: async () => {
+            if (!selectedCountry) return [];
+            const res = await fetch(`https://v3.football.api-sports.io/leagues?country=${selectedCountry}`, {
+                headers: { 'x-apisports-key': API_KEY },
+            });
+            const data = await res.json();
+            return data.response;
+        },
+        enabled: !!selectedCountry,
+    });
+
+    const { data: stadiums = [] } = useQuery({
+        queryKey: ['stadiums', selectedCountry],
+        queryFn: async () => {
+            if (!selectedCountry) return [];
+            const res = await fetch(`https://v3.football.api-sports.io/venues?country=${selectedCountry}`, {
+                headers: { 'x-apisports-key': API_KEY },
+            });
+            const data = await res.json();
+            return data.response;
+        },
+        enabled: !!selectedCountry,
+    });
+
+    const { data: teams = [] } = useQuery({
+        queryKey: ['teams', selectedLeague],
+        queryFn: async () => {
+            if (!selectedLeague) return [];
+            const res = await fetch(`https://v3.football.api-sports.io/teams?league=${selectedLeague}&season=2023`, {
+                headers: { 'x-apisports-key': API_KEY },
+            });
+            const data = await res.json();
+            return data.response;
+        },
+        enabled: !!selectedLeague,
     });
 
     const {
@@ -54,25 +103,37 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
 
     const onSubmit = async (values: CreateRecommendationModalValues) => {
         console.log('Submitting recommendation:', values);
+        const { title, description, country, date, stadium, league, homeTeam, awayTeam } = values;
+
+        const match = await MatchService.createMatch({
+            country,
+            stadium,
+            league,
+            date,
+            homeTeam,
+            awayTeam,
+        });
         await RecommendationService.createRecommendation({
-            ...values,
+            title,
+            description,
+            matchId: match!._id,
             picture: imageUrl, // Store image URL
             createdBy: '123412341234123412341234',
         });
         reset();
         setImageUrl(''); // Clear image preview
-        setMatchLabel('');
-        setSearchTerm('');
+        setSelectedCountry('');
+        setSelectedLeague(undefined);
         onClose();
     };
 
-    // Debounced search function to optimize API calls
-    const debouncedSearch = useCallback(
-        debounce((searchText: string) => {
-            setSearchTerm(searchText);
-        }, 500),
-        []
-    );
+    // // Debounced search function to optimize API calls
+    // const debouncedSearch = useCallback(
+    //     debounce((searchText: string) => {
+    //         setSearchTerm(searchText);
+    //     }, 500),
+    //     []
+    // );
 
     // Handle file upload
     const handleUpload = async (file: File) => {
@@ -111,31 +172,91 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
             onCancel={() => {
                 reset();
                 setImageUrl(''); // Clear image preview
-                setMatchLabel('');
-                setSearchTerm('');
+                setSelectedCountry('');
+                setSelectedLeague(undefined);
                 onClose();
             }}
             footer={null}
             className={styles.modal}
         >
             <Form layout="vertical" className={styles.form} onFinish={handleSubmit(onSubmit)}>
-                <Form.Item label="Match" validateStatus={errors.matchId ? 'error' : ''} help={errors.matchId?.message}>
+                <Form.Item
+                    label="Country"
+                    validateStatus={errors.country ? 'error' : ''}
+                    help={errors.country?.message}
+                >
                     <AutoComplete
-                        options={matches.map((match: any) => ({
-                            value: match.id, // The ID stored in the form
-                            label: `${match.name} - ${new Date(match.dates.start.dateTime).toLocaleDateString()}` as string, // What the user sees
-                        }))}
-                        value={matchLabel} // Displayed value
-                        onChange={(value) => {
-                            setMatchLabel(value); // Show user-friendly label
+                        options={countries.map((c) => ({ value: c.name }))}
+                        onSelect={(value) => {
+                            setSelectedCountry(value);
+                            setValue('country', value);
+                            setValue('league', '');
+                            setValue('stadium', '');
+                            setValue('homeTeam', '');
+                            setValue('awayTeam', '');
                         }}
+                        placeholder="Select a country"
+                    />
+                </Form.Item>
+
+                <Form.Item label="League" validateStatus={errors.league ? 'error' : ''} help={errors.league?.message}>
+                    <AutoComplete
+                        options={leagues.map((l) => ({ value: l.league.name, id: l.league.id }))}
                         onSelect={(value, option) => {
-                            setValue('matchId', value); // Store match ID
-                            setMatchLabel(option.label as string); // Show selected match name
+                            setSelectedLeague(option.id);
+                            setValue('league', value);
+                            setValue('homeTeam', '');
+                            setValue('awayTeam', '');
                         }}
-                        onSearch={debouncedSearch}
-                        placeholder="Search for a match..."
-                        notFoundContent={isFetching ? <Spin size="small" /> : 'No matches found'}
+                        placeholder="Select a league"
+                        disabled={!selectedCountry}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    label="Stadium"
+                    validateStatus={errors.stadium ? 'error' : ''}
+                    help={errors.stadium?.message}
+                >
+                    <AutoComplete
+                        options={stadiums.map((venue) => ({ value: venue.name }))}
+                        onSelect={(value) => setValue('stadium', value)}
+                        placeholder="Select a stadium"
+                        disabled={!selectedCountry}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    label="Home Team"
+                    validateStatus={errors.homeTeam ? 'error' : ''}
+                    help={errors.homeTeam?.message}
+                >
+                    <AutoComplete
+                        options={teams.map((t) => ({ value: t.team.name }))}
+                        onSelect={(value) => setValue('homeTeam', value)}
+                        placeholder="Select home team"
+                        disabled={!selectedLeague}
+                    />
+                </Form.Item>
+
+                <Form.Item
+                    label="Away Team"
+                    validateStatus={errors.awayTeam ? 'error' : ''}
+                    help={errors.awayTeam?.message}
+                >
+                    <AutoComplete
+                        options={teams.map((t) => ({ value: t.team.name }))}
+                        onSelect={(value) => setValue('awayTeam', value)}
+                        placeholder="Select away team"
+                        disabled={!selectedLeague}
+                    />
+                </Form.Item>
+
+                <Form.Item label="Match Date">
+                    <Controller
+                        name="date"
+                        control={control}
+                        render={({ field }) => <DatePicker {...field} style={{ width: '100%' }} />}
                     />
                 </Form.Item>
 

@@ -48,13 +48,13 @@ export const RecommendationService = {
         try {
             const response = await axiosInstance.post(ROUTE_PREFIX, recommendationData);
 
-            const { data: user, success, error } = RecommendationPayloadSchema.safeParse(response.data);
+            const { data: recommendation, success, error } = RecommendationPayloadSchema.safeParse(response.data);
 
             if (!success) {
                 console.error('Not valid response for creating recommendation:', error);
             }
 
-            return user;
+            return recommendation;
         } catch (error) {
             console.error('Error creating recommendation:', error);
             throw error;

@@ -21,7 +21,7 @@ const recommendationMock: Recommendation = {
         date: new Date('2024-03-01'),
         country: 'Spain',
         createdAt: new Date('2024-03-01'),
-        competition: 'Champions League',
+        league: 'Champions League',
         stadium: 'Santiago Bernabeu',
     },
     createdBy: {
@@ -196,7 +196,7 @@ export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenP
                                 <div className={classes.matchMeta}>
                                     <div>
                                         <Trophy size={16} />
-                                        <span>{recommendation.match.competition}</span>
+                                        <span>{recommendation.match.league}</span>
                                     </div>
                                     <div>
                                         <MapPin size={16} />

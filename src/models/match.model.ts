@@ -5,7 +5,7 @@ export const MatchSchema = z.object({
     homeTeam: z.string(),
     awayTeam: z.string(),
     date: z.date(),
-    competition: z.string(),
+    league: z.string(),
     country: z.string(),
     stadium: z.string(),
     createdAt: z.date(),
@@ -13,4 +13,7 @@ export const MatchSchema = z.object({
 
 export const MatchPayloadSchema = MatchSchema.omit({ createdAt: true });
 
+export const CreateMatchSchema = MatchPayloadSchema.omit({ _id: true });
+
 export type Match = z.infer<typeof MatchSchema>;
+export type CreateMatchBody = z.infer<typeof CreateMatchSchema>;
