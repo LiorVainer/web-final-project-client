@@ -1,13 +1,14 @@
 import { z } from 'zod';
 import { UserSchema } from '@/models/user.model.ts';
 import { MatchSchema } from '@/models/match.model.ts';
+import { zodDate } from '@/types/common.types';
 
 const CommentSchema = z.object({
     _id: z.string(),
     postId: z.string(),
     userId: z.string(),
     content: z.string(),
-    createdAt: z.date(),
+    createdAt: zodDate,
 });
 
 export const RecommendationPayloadSchema = z.object({
@@ -20,8 +21,8 @@ export const RecommendationPayloadSchema = z.object({
 });
 
 export const RecommendationSchema = RecommendationPayloadSchema.omit({ matchId: true }).extend({
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createdAt: zodDate,
+    updatedAt: zodDate,
     createdBy: UserSchema.omit({ password: true }),
     match: MatchSchema,
     comments: z.array(CommentSchema),

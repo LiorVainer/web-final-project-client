@@ -1,16 +1,18 @@
-import { useState, useCallback } from 'react';
-import { Modal, Form, Input, Button, AutoComplete, Upload, Spin, message, DatePicker } from 'antd';
+import { useState } from 'react';
+import { Modal, Form, Input, Button, AutoComplete, Upload, message, DatePicker, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
-import { useQuery } from '@tanstack/react-query';
-import { debounce } from 'lodash';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import styles from './CreateRecommendationModal.module.scss';
 import { RecommendationService } from '@/api/services/recommendation.service';
 import { MatchService } from '@/api/services/match.service';
+import { SoccerService } from '@/api/services/soccer.service';
+import { FileService } from '@/api/services/file.service';
+import { Country, League, Team, Venue } from '@/models/match.model';
+import { ROUTES } from '@/constants/routes.const';
 
-// Recommendation Schema with Yup validation
 const RecommendationSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
     description: Yup.string().min(10, 'Description is too short').required('Description is required'),
@@ -30,63 +32,71 @@ type CreateRecommendationModalProps = {
 
 type CreateRecommendationModalValues = Yup.InferType<typeof RecommendationSchema>;
 
-const API_KEY = 'e859464540085b15535c5ed431595955';
-
 const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModalProps) => {
     const [imageUrl, setImageUrl] = useState<string>('');
+    const [selectedCountry, setSelectedCountry] = useState<string>('');
+    const [selectedLeague, setSelectedLeague] = useState<number>();
     const [uploading, setUploading] = useState(false);
-    const [selectedCountry, setSelectedCountry] = useState('');
-    const [selectedLeague, setSelectedLeague] = useState<number | undefined>();
 
-    // Fetch countries
-    const { data: countries = [] } = useQuery({
+    const { mutate: uploadImage } = useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            const { data } = await FileService.handleUpload(formData);
+            return data;
+        },
+        onMutate: () => {
+            setUploading(true);
+        },
+        onSuccess: (data) => {
+            if (data.url) {
+                message.success('Image uploaded successfully');
+                const filePath = data.url.split('/public/')[1];
+                setImageUrl(filePath);
+                setValue('picture', filePath);
+            } else {
+                message.error('Upload failed');
+            }
+        },
+        onError: () => {
+            message.error('Upload error');
+        },
+        onSettled: () => {
+            setUploading(false);
+        },
+    });
+
+    const { data: countries = [] } = useQuery<Country[]>({
         queryKey: ['countries'],
         queryFn: async () => {
-            const res = await fetch(`https://v3.football.api-sports.io/countries`, {
-                headers: { 'x-apisports-key': API_KEY },
-            });
-            const data = await res.json();
-            return data.response;
+            return SoccerService.getCountries();
         },
         enabled: !!isOpen,
     });
 
-    // Fetch stadiums and leagues based on country
-    const { data: leagues = [] } = useQuery({
+    const { data: leagues = [] } = useQuery<{ league: League; country: Country }[]>({
         queryKey: ['leagues', selectedCountry],
         queryFn: async () => {
             if (!selectedCountry) return [];
-            const res = await fetch(`https://v3.football.api-sports.io/leagues?country=${selectedCountry}`, {
-                headers: { 'x-apisports-key': API_KEY },
-            });
-            const data = await res.json();
-            return data.response;
+            return SoccerService.getLeagues(selectedCountry);
         },
         enabled: !!selectedCountry,
     });
 
-    const { data: stadiums = [] } = useQuery({
+    const { data: stadiums = [] } = useQuery<Venue[]>({
         queryKey: ['stadiums', selectedCountry],
         queryFn: async () => {
             if (!selectedCountry) return [];
-            const res = await fetch(`https://v3.football.api-sports.io/venues?country=${selectedCountry}`, {
-                headers: { 'x-apisports-key': API_KEY },
-            });
-            const data = await res.json();
-            return data.response;
+            return SoccerService.getVenues(selectedCountry);
         },
         enabled: !!selectedCountry,
     });
 
-    const { data: teams = [] } = useQuery({
+    const { data: teams = [] } = useQuery<{ team: Team; venue: Venue }[]>({
         queryKey: ['teams', selectedLeague],
         queryFn: async () => {
             if (!selectedLeague) return [];
-            const res = await fetch(`https://v3.football.api-sports.io/teams?league=${selectedLeague}&season=2023`, {
-                headers: { 'x-apisports-key': API_KEY },
-            });
-            const data = await res.json();
-            return data.response;
+            return SoccerService.getTeams(selectedLeague);
         },
         enabled: !!selectedLeague,
     });
@@ -102,66 +112,39 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
     });
 
     const onSubmit = async (values: CreateRecommendationModalValues) => {
-        console.log('Submitting recommendation:', values);
         const { title, description, country, date, stadium, league, homeTeam, awayTeam } = values;
-
-        const match = await MatchService.createMatch({
-            country,
-            stadium,
-            league,
-            date,
-            homeTeam,
-            awayTeam,
-        });
-        await RecommendationService.createRecommendation({
-            title,
-            description,
-            matchId: match!._id,
-            picture: imageUrl, // Store image URL
-            createdBy: '123412341234123412341234',
-        });
-        reset();
-        setImageUrl(''); // Clear image preview
-        setSelectedCountry('');
-        setSelectedLeague(undefined);
-        onClose();
-    };
-
-    // // Debounced search function to optimize API calls
-    // const debouncedSearch = useCallback(
-    //     debounce((searchText: string) => {
-    //         setSearchTerm(searchText);
-    //     }, 500),
-    //     []
-    // );
-
-    // Handle file upload
-    const handleUpload = async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        setUploading(true);
-
         try {
-            const response = await fetch('http://localhost:3000/file', {
-                method: 'POST',
-                body: formData,
+            const match = await MatchService.createMatch({
+                country,
+                stadium,
+                league,
+                date,
+                homeTeam,
+                awayTeam,
             });
 
-            const data = await response.json();
-            console.log(data);
-            if (response.ok) {
-                message.success('Image uploaded successfully');
-                const filePath = data.url.split('/public/')[1];
+            if (match) {
+                await RecommendationService.createRecommendation({
+                    title,
+                    description,
+                    matchId: match._id,
+                    picture: imageUrl,
+                    createdBy: '123412341234123412341234',
+                });
 
-                setImageUrl(filePath);
-                setValue('picture', filePath);
+                message.success('Recommendation created successfully');
             } else {
-                message.error('Upload failed');
+                message.error('Failed to create match');
+                return;
             }
+
+            reset();
+            setImageUrl('');
+            setSelectedCountry('');
+            setSelectedLeague(undefined);
+            onClose();
         } catch (error) {
-            message.error('Upload error');
-        } finally {
-            setUploading(false);
+            message.error('An error occurred while submitting the recommendation.');
         }
     };
 
@@ -171,7 +154,7 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
             open={isOpen}
             onCancel={() => {
                 reset();
-                setImageUrl(''); // Clear image preview
+                setImageUrl('');
                 setSelectedCountry('');
                 setSelectedLeague(undefined);
                 onClose();
@@ -186,7 +169,7 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
                     help={errors.country?.message}
                 >
                     <AutoComplete
-                        options={countries.map((c) => ({ value: c.name }))}
+                        options={countries.map((option) => ({ value: option.name }))}
                         onSelect={(value) => {
                             setSelectedCountry(value);
                             setValue('country', value);
@@ -194,6 +177,7 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
                             setValue('stadium', '');
                             setValue('homeTeam', '');
                             setValue('awayTeam', '');
+                            setSelectedLeague(undefined);
                         }}
                         placeholder="Select a country"
                     />
@@ -201,7 +185,7 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
 
                 <Form.Item label="League" validateStatus={errors.league ? 'error' : ''} help={errors.league?.message}>
                     <AutoComplete
-                        options={leagues.map((l) => ({ value: l.league.name, id: l.league.id }))}
+                        options={leagues.map((option) => ({ value: option.league.name, id: option.league.id }))}
                         onSelect={(value, option) => {
                             setSelectedLeague(option.id);
                             setValue('league', value);
@@ -219,38 +203,44 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
                     help={errors.stadium?.message}
                 >
                     <AutoComplete
-                        options={stadiums.map((venue) => ({ value: venue.name }))}
+                        options={stadiums.map((option) => ({ value: option.name }))}
                         onSelect={(value) => setValue('stadium', value)}
                         placeholder="Select a stadium"
                         disabled={!selectedCountry}
                     />
                 </Form.Item>
 
-                <Form.Item
-                    label="Home Team"
-                    validateStatus={errors.homeTeam ? 'error' : ''}
-                    help={errors.homeTeam?.message}
-                >
-                    <AutoComplete
-                        options={teams.map((t) => ({ value: t.team.name }))}
-                        onSelect={(value) => setValue('homeTeam', value)}
-                        placeholder="Select home team"
-                        disabled={!selectedLeague}
-                    />
-                </Form.Item>
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item
+                            label="Home Team"
+                            validateStatus={errors.homeTeam ? 'error' : ''}
+                            help={errors.homeTeam?.message}
+                        >
+                            <AutoComplete
+                                options={teams.map((option) => ({ value: option.team.name }))}
+                                onSelect={(value) => setValue('homeTeam', value)}
+                                placeholder="Select home team"
+                                disabled={!selectedLeague}
+                            />
+                        </Form.Item>
+                    </Col>
 
-                <Form.Item
-                    label="Away Team"
-                    validateStatus={errors.awayTeam ? 'error' : ''}
-                    help={errors.awayTeam?.message}
-                >
-                    <AutoComplete
-                        options={teams.map((t) => ({ value: t.team.name }))}
-                        onSelect={(value) => setValue('awayTeam', value)}
-                        placeholder="Select away team"
-                        disabled={!selectedLeague}
-                    />
-                </Form.Item>
+                    <Col span={12}>
+                        <Form.Item
+                            label="Away Team"
+                            validateStatus={errors.awayTeam ? 'error' : ''}
+                            help={errors.awayTeam?.message}
+                        >
+                            <AutoComplete
+                                options={teams.map((t) => ({ value: t.team.name }))}
+                                onSelect={(value) => setValue('awayTeam', value)}
+                                placeholder="Select away team"
+                                disabled={!selectedLeague}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
 
                 <Form.Item label="Match Date">
                     <Controller
@@ -278,7 +268,7 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
                 <Form.Item label="Upload Image">
                     <Upload
                         beforeUpload={(file) => {
-                            handleUpload(file);
+                            uploadImage(file);
                             return false;
                         }}
                         showUploadList={false}
@@ -288,20 +278,12 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
                         </Button>
                     </Upload>
 
-                    {/* Small preview of the uploaded image */}
                     {imageUrl && (
-                        <div style={{ marginTop: 10, textAlign: 'center' }}>
+                        <div className="image-preview-container">
                             <img
-                                src={`http://localhost:3000/public/${imageUrl}`}
+                                src={`${ROUTES.publicRoute}${imageUrl}`}
                                 alt="Uploaded Preview"
-                                style={{
-                                    width: 80,
-                                    height: 80,
-                                    objectFit: 'cover',
-                                    borderRadius: 8,
-                                    border: '1px solid #d9d9d9',
-                                    padding: 4,
-                                }}
+                                className="image-preview"
                             />
                         </div>
                     )}

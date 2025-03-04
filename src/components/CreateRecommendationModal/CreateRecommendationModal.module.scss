@@ -28,3 +28,17 @@
         background: #40a9ff;
     }
 }
+
+.image-preview-container {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.image-preview {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+    padding: 4px;
+}

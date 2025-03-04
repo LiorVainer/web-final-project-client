@@ -1,9 +1,10 @@
+import { zodDate } from '@/types/common.types';
 import { z } from 'zod';
 
 export const ChatMessageSchema = z.object({
     senderId: z.string(),
     content: z.string(),
-    createdAt: z.date(),
+    createdAt: zodDate,
 });
 
 export const ChatSchema = z.object({
@@ -11,8 +12,8 @@ export const ChatSchema = z.object({
     postId: z.string(),
     participants: z.array(z.string()), // Array of userIds
     messages: z.array(ChatMessageSchema),
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createdAt: zodDate,
+    updatedAt: zodDate,
 });
 
 export type Chat = z.infer<typeof ChatSchema>;

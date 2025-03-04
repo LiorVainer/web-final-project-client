@@ -1,5 +1,5 @@
 import { axiosInstance } from '../config/axios-instance';
-import { CreateMatchBody, CreateMatchSchema, Match, MatchPayloadSchema } from '@/models/match.model.ts';
+import { CreateMatchBody, Match, MatchPayloadSchema } from '@/models/match.model.ts';
 import { GetByQuery } from '../config/query.types';
 
 export const ROUTE_PREFIX = '/matches';
@@ -17,15 +17,9 @@ export const MatchService = {
 
     async createMatch(matchData: CreateMatchBody) {
         try {
-            const response = await axiosInstance.post(ROUTE_PREFIX, matchData);
+            const { data } = await axiosInstance.post<Match>(ROUTE_PREFIX, matchData);
 
-            const { data: match, success, error } = MatchPayloadSchema.safeParse(response.data);
-
-            if (!success) {
-                console.error('Not valid response for creating match:', error);
-            }
-
-            return match;
+            return data;
         } catch (error) {
             console.error('Error creating match:', error);
             throw error;
