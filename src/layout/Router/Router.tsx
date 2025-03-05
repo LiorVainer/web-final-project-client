@@ -10,7 +10,7 @@ export const Router = (_props: RouterProps) => {
     return (
         <Routes>
             <Route path="/" element={<Layout />}>
-                <Route path="matchExperience">
+                <Route path="match-experience">
                     <Route index element={<MatchExperiencesCatalogScreen />}></Route>
                     <Route path=":id" element={<MatchExperienceDetailsScreen />}></Route>
                 </Route>
