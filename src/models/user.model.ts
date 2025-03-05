@@ -1,3 +1,4 @@
+import { zodDate } from '@/types/common.types';
 import { z } from 'zod';
 
 export const UserSchema = z.object({
@@ -6,8 +7,8 @@ export const UserSchema = z.object({
     password: z.string(),
     email: z.string().email(),
     pictureId: z.string(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
+    createdAt: zodDate,
+    updatedAt: zodDate,
 });
 
 export type User = z.infer<typeof UserSchema>;
