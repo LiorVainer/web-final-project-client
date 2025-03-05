@@ -14,16 +14,12 @@ export interface MatchExperienceDetailsScreenProps {}
 
 const matchExperienceMock: MatchExperience = {
     _id: '1',
-    match: {
-        _id: '1',
-        homeTeam: 'Barcelona',
-        awayTeam: 'Liverpool',
-        date: new Date('2024-03-01'),
-        country: 'Spain',
-        createdAt: new Date('2024-03-01'),
-        league: 'Champions League',
-        stadium: 'Santiago Bernabeu',
-    },
+    homeTeam: 'Barcelona',
+    awayTeam: 'Liverpool',
+    matchDate: new Date('2024-03-01'),
+    country: 'Spain',
+    league: 'Champions League',
+    stadium: 'Santiago Bernabeu',
     createdBy: {
         _id: 'user1',
         username: 'user1',
@@ -45,7 +41,7 @@ const matchExperienceMock: MatchExperience = {
             createdAt: new Date('2024-03-10'),
         },
     ],
-    pictureId: '1',
+    picture: '1',
     createdAt: new Date('2024-03-01'),
     updatedAt: new Date('2024-03-01'),
 };
@@ -113,7 +109,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
             <div className={classes.card}>
                 <div className={classes.content}>
                     <div className={classes.header}>
-                        {matchExperience.pictureId && (
+                        {matchExperience.picture && (
                             <img
                                 src={`https://picsum.photos/1200/800`}
                                 alt={matchExperience.title}
@@ -189,24 +185,24 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                         <div className={classes.left}>
                             <div className={classes.matchDetails}>
                                 <div className={classes.teams}>
-                                    <span>{matchExperience.match.homeTeam}</span>
+                                    <span>{matchExperience.homeTeam}</span>
                                     <span>vs</span>
-                                    <span>{matchExperience.match.awayTeam}</span>
+                                    <span>{matchExperience.awayTeam}</span>
                                 </div>
                                 <div className={classes.matchMeta}>
                                     <div>
                                         <Trophy size={16} />
-                                        <span>{matchExperience.match.league}</span>
+                                        <span>{matchExperience.league}</span>
                                     </div>
                                     <div>
                                         <MapPin size={16} />
                                         <span>
-                                            {matchExperience.match.stadium}, {matchExperience.match.country}
+                                            {matchExperience.stadium}, {matchExperience.country}
                                         </span>
                                     </div>
                                     <div>
                                         <Calendar size={16} />
-                                        <span>{new Date(matchExperience.match.date).toLocaleDateString()}</span>
+                                        <span>{new Date(matchExperience.matchDate).toLocaleDateString()}</span>
                                     </div>
                                 </div>
                             </div>
