@@ -6,7 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import styles from './CreateMatchExperienceModal.module.scss';
-import { MatchExperienceService } from '@/api/services/matchExperience.service';
+import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
 import { ROUTES } from '@/constants/routes.const';

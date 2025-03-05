@@ -1,8 +1,8 @@
 import { useParams } from 'react-router';
 import { Calendar, Heart, Loader, MapPin, MessageCircle, Send, Trophy, User } from 'lucide-react';
-import { MatchExperienceService } from '@api/services/matchExperience.service.ts';
+import { MatchExperienceService } from '@/api/services/match-experience.service';
 import classes from './matchExperience-details-screen.module.scss';
-import { MatchExperience } from '@/models/matchExperience.model.ts';
+import { MatchExperience } from '@/models/match-experience.model';
 import { FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';

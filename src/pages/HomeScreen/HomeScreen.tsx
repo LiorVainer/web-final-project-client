@@ -4,7 +4,7 @@ import { useQueryService } from '@api/hooks/service.query.ts';
 import { UsersService } from '@api/services/users.service.ts';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { MatchExperienceService } from '@/api/services/matchExperience.service';
+import { MatchExperienceService } from '@/api/services/match-experience.service';
 
 export interface HomeScreenProps {}
 
