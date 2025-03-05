@@ -5,13 +5,13 @@ import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import styles from './CreateRecommendationModal.module.scss';
-import { RecommendationService } from '@/api/services/recommendation.service';
+import styles from './CreateMatchExperienceModal.module.scss';
+import { MatchExperienceService } from '@/api/services/matchExperience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
 import { ROUTES } from '@/constants/routes.const';
 
-const RecommendationSchema = Yup.object().shape({
+const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
     description: Yup.string().min(10, 'Description is too short').required('Description is required'),
     picture: Yup.string().optional(),
@@ -30,14 +30,14 @@ export const fetchData = <T,>(key: string, param: any, fetchFn: (param: any) => 
         enabled: !!param,
     });
 
-type CreateRecommendationModalProps = {
+type CreateMatchExperienceModalProps = {
     isOpen: boolean;
     onClose: () => void;
 };
 
-type CreateRecommendationModalValues = Yup.InferType<typeof RecommendationSchema>;
+type CreateMatchExperienceModalValues = Yup.InferType<typeof MatchExperienceSchema>;
 
-const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModalProps) => {
+const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceModalProps) => {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedCountry, setSelectedCountry] = useState<string>('');
     const [selectedLeague, setSelectedLeague] = useState<number>();
@@ -75,20 +75,20 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
         setValue,
         reset,
         formState: { errors },
-    } = useForm<CreateRecommendationModalValues>({
-        resolver: yupResolver(RecommendationSchema),
+    } = useForm<CreateMatchExperienceModalValues>({
+        resolver: yupResolver(MatchExperienceSchema),
     });
 
-    const onSubmit = async (values: CreateRecommendationModalValues) => {
+    const onSubmit = async (values: CreateMatchExperienceModalValues) => {
         // const { title, description, country, date, stadium, league, homeTeam, awayTeam } = values;
         try {
-            await RecommendationService.createRecommendation({
+            await MatchExperienceService.createMatchExperience({
                 ...values,
                 picture: imageUrl,
                 createdBy: '123412341234123412341234',
             });
 
-            message.success('Recommendation created successfully');
+            message.success('MatchExperience created successfully');
 
             reset();
             setImageUrl('');
@@ -96,13 +96,13 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
             setSelectedLeague(undefined);
             onClose();
         } catch (error) {
-            message.error('An error occurred while submitting the recommendation.');
+            message.error('An error occurred while submitting the matchExperience.');
         }
     };
 
     return (
         <Modal
-            title="Create Recommendation"
+            title="Create MatchExperience"
             open={isOpen}
             onCancel={() => {
                 reset();
@@ -249,4 +249,4 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
     );
 };
 
-export default CreateRecommendationModal;
+export default CreateMatchExperienceModal;

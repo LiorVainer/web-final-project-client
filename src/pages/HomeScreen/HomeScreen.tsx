@@ -1,32 +1,32 @@
-import CreateRecommendationModal from '@/components/CreateRecommendationModal';
+import CreateMatchExperienceModal from '@/components/CreateMatchExperienceModal';
 import classes from './home-screen.module.scss';
 import { useQueryService } from '@api/hooks/service.query.ts';
 import { UsersService } from '@api/services/users.service.ts';
 import { Button } from 'antd';
 import { useState } from 'react';
-import { RecommendationService } from '@/api/services/recommendation.service';
+import { MatchExperienceService } from '@/api/services/matchExperience.service';
 
 export interface HomeScreenProps {}
 
 export const HomeScreen = ({}: HomeScreenProps) => {
     const { data, error, isPending } = useQueryService({ service: UsersService, method: 'getUsers' });
     const {
-        data: recommendations,
-        error: recommendationsError,
-        isPending: recommendationsIsPending,
+        data: matchExperiences,
+        error: matchExperiencesError,
+        isPending: matchExperiencesIsPending,
         refetch,
     } = useQueryService({
-        service: RecommendationService,
-        method: 'getAllRecommendation',
+        service: MatchExperienceService,
+        method: 'getAllMatchExperience',
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    if (error || recommendationsError) {
+    if (error || matchExperiencesError) {
         console.error('Error', error);
         return <div>Error has occurred</div>;
     }
 
-    if (!data || isPending || recommendationsIsPending) {
+    if (!data || isPending || matchExperiencesIsPending) {
         return <Button>Loading...</Button>;
     }
 
@@ -36,23 +36,23 @@ export const HomeScreen = ({}: HomeScreenProps) => {
             {data.map((user) => (
                 <div>{user.email}</div>
             ))}
-            {recommendations?.length ? (
-                recommendations.map((recommendation) => (
-                    <div key={recommendation._id}>{JSON.stringify(recommendation)}</div>
+            {matchExperiences?.length ? (
+                matchExperiences.map((matchExperience) => (
+                    <div key={matchExperience._id}>{JSON.stringify(matchExperience)}</div>
                 ))
             ) : (
-                <div>No recommendations found.</div>
+                <div>No matchExperiences found.</div>
             )}
             <button className={classes.button}>Press Me</button>
             <button className={classes.button} onClick={() => setIsModalOpen(true)}>
-                Create Recommendation
+                Create MatchExperience
             </button>
 
-            <CreateRecommendationModal
+            <CreateMatchExperienceModal
                 isOpen={isModalOpen}
                 onClose={() => {
                     setIsModalOpen(false);
-                    refetch(); // Trigger refetch of recommendations when modal closes
+                    refetch(); // Trigger refetch of matchExperiences when modal closes
                 }}
             />
         </div>

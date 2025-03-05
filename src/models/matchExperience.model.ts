@@ -10,7 +10,7 @@ const CommentSchema = z.object({
     createdAt: zodDate,
 });
 
-export const RecommendationPayloadSchema = z.object({
+export const MatchExperiencePayloadSchema = z.object({
     _id: z.string(),
     title: z.string(),
     description: z.string(),
@@ -24,18 +24,18 @@ export const RecommendationPayloadSchema = z.object({
     picture: z.string().optional(),
 });
 
-export const RecommendationSchema = RecommendationPayloadSchema.extend({
+export const MatchExperienceSchema = MatchExperiencePayloadSchema.extend({
     createdAt: zodDate,
     updatedAt: zodDate,
     createdBy: UserSchema.omit({ password: true }),
     comments: z.array(CommentSchema),
 });
 
-export const CreateRecommendationSchema = RecommendationPayloadSchema.omit({ _id: true, likes: true }).extend({
+export const CreateMatchExperienceSchema = MatchExperiencePayloadSchema.omit({ _id: true, likes: true }).extend({
     createdBy: z.string(),
 });
 
 export type Comment = z.infer<typeof CommentSchema>;
-export type Recommendation = z.infer<typeof RecommendationSchema>;
+export type MatchExperience = z.infer<typeof MatchExperienceSchema>;
 
-export type CreateRecommendationBody = z.infer<typeof CreateRecommendationSchema>;
+export type CreateMatchExperienceBody = z.infer<typeof CreateMatchExperienceSchema>;

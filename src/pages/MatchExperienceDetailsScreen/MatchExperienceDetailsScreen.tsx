@@ -1,8 +1,8 @@
 import { useParams } from 'react-router';
 import { Calendar, Heart, Loader, MapPin, MessageCircle, Send, Trophy, User } from 'lucide-react';
-import { RecommendationService } from '@api/services/recommendation.service.ts';
-import classes from './recommendation-details-screen.module.scss';
-import { Recommendation } from '@/models/recommendation.model.ts';
+import { MatchExperienceService } from '@api/services/matchExperience.service.ts';
+import classes from './matchExperience-details-screen.module.scss';
+import { MatchExperience } from '@/models/matchExperience.model.ts';
 import { FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -10,9 +10,9 @@ import { Screen } from '@components/Screen';
 import { LiveChatModal } from '@components/LiveChatModal';
 import { Input, Spin } from 'antd';
 
-export interface RecommendationDetailsScreenProps {}
+export interface MatchExperienceDetailsScreenProps {}
 
-const recommendationMock: Recommendation = {
+const matchExperienceMock: MatchExperience = {
     _id: '1',
     match: {
         _id: '1',
@@ -50,33 +50,33 @@ const recommendationMock: Recommendation = {
     updatedAt: new Date('2024-03-01'),
 };
 
-export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenProps) => {
-    const { id: recommendationId } = useParams();
+export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScreenProps) => {
+    const { id: matchExperienceId } = useParams();
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [newComment, setNewComment] = useState('');
     const queryClient = useQueryClient();
 
-    if (!recommendationId) return null;
+    if (!matchExperienceId) return null;
 
     const {
-        data: recommendation,
+        data: matchExperience,
         isLoading,
         error,
     } = useQuery({
-        queryKey: ['recommendation', recommendationId],
-        queryFn: () => RecommendationService.getRecommendationById(recommendationId),
-        initialData: recommendationMock,
+        queryKey: ['matchExperience', matchExperienceId],
+        queryFn: () => MatchExperienceService.getMatchExperienceById(matchExperienceId),
+        initialData: matchExperienceMock,
     });
 
     const likeMutation = useMutation({
-        mutationFn: () => RecommendationService.likeRecommendation(recommendationId),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recommendation', recommendationId] }),
+        mutationFn: () => MatchExperienceService.likeMatchExperience(matchExperienceId),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['matchExperience', matchExperienceId] }),
     });
 
     const commentMutation = useMutation({
-        mutationFn: (comment: string) => RecommendationService.addComment(recommendationId, comment),
+        mutationFn: (comment: string) => MatchExperienceService.addComment(matchExperienceId, comment),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['recommendation', recommendationId] });
+            queryClient.invalidateQueries({ queryKey: ['matchExperience', matchExperienceId] });
             setNewComment('');
         },
     });
@@ -85,15 +85,15 @@ export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenP
         return (
             <Screen className={classes.loadingContainer}>
                 <Spin className={classes.spinner} size={'large'} />
-                <h4>Loading recommendation...</h4>
+                <h4>Loading matchExperience...</h4>
             </Screen>
         );
     }
 
-    if (error || !recommendation) {
+    if (error || !matchExperience) {
         return (
             <Screen>
-                <p>Error loading recommendation</p>
+                <p>Error loading matchExperience</p>
             </Screen>
         );
     }
@@ -113,16 +113,16 @@ export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenP
             <div className={classes.card}>
                 <div className={classes.content}>
                     <div className={classes.header}>
-                        {recommendation.pictureId && (
+                        {matchExperience.pictureId && (
                             <img
                                 src={`https://picsum.photos/1200/800`}
-                                alt={recommendation.title}
+                                alt={matchExperience.title}
                                 className={classes.image}
                             />
                         )}
                         <div className={classes.right}>
                             <div className={classes.top}>
-                                <p className={classes.title}>{recommendation.title}</p>
+                                <p className={classes.title}>{matchExperience.title}</p>
                                 <div className={classes.actions}>
                                     <button
                                         className={clsx(classes.likeButton, {
@@ -132,7 +132,7 @@ export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenP
                                         disabled={likeMutation.isPending}
                                     >
                                         <Heart size={15} />
-                                        <span>{recommendation.likes.length}</span>
+                                        <span>{matchExperience.likes.length}</span>
                                     </button>
 
                                     <button
@@ -146,7 +146,7 @@ export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenP
                                     </button>
                                 </div>
                             </div>
-                            <p className={classes.description}>{recommendation.description}</p>
+                            <p className={classes.description}>{matchExperience.description}</p>
                         </div>
                     </div>
                     <div className={classes.footer}>
@@ -175,7 +175,7 @@ export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenP
                             </div>
 
                             <div className={classes.commentsList}>
-                                {recommendation.comments.map((comment) => (
+                                {matchExperience.comments.map((comment) => (
                                     <div key={comment._id} className={classes.commentItem}>
                                         <div className={classes.commentAvatar} />
                                         <div className={classes.commentContent}>
@@ -189,44 +189,44 @@ export const RecommendationDetailsScreen = (_props: RecommendationDetailsScreenP
                         <div className={classes.left}>
                             <div className={classes.matchDetails}>
                                 <div className={classes.teams}>
-                                    <span>{recommendation.match.homeTeam}</span>
+                                    <span>{matchExperience.match.homeTeam}</span>
                                     <span>vs</span>
-                                    <span>{recommendation.match.awayTeam}</span>
+                                    <span>{matchExperience.match.awayTeam}</span>
                                 </div>
                                 <div className={classes.matchMeta}>
                                     <div>
                                         <Trophy size={16} />
-                                        <span>{recommendation.match.league}</span>
+                                        <span>{matchExperience.match.league}</span>
                                     </div>
                                     <div>
                                         <MapPin size={16} />
                                         <span>
-                                            {recommendation.match.stadium}, {recommendation.match.country}
+                                            {matchExperience.match.stadium}, {matchExperience.match.country}
                                         </span>
                                     </div>
                                     <div>
                                         <Calendar size={16} />
-                                        <span>{new Date(recommendation.match.date).toLocaleDateString()}</span>
+                                        <span>{new Date(matchExperience.match.date).toLocaleDateString()}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className={classes.userInfo}>
                                 <div className={classes.user}>
-                                    {recommendation.createdBy.pictureId && (
+                                    {matchExperience.createdBy.pictureId && (
                                         <img
-                                            src={`https://picsum.photos/200/200?random=${recommendation.createdBy.pictureId}`}
-                                            alt={recommendation.createdBy.username}
+                                            src={`https://picsum.photos/200/200?random=${matchExperience.createdBy.pictureId}`}
+                                            alt={matchExperience.createdBy.username}
                                             className={classes.userAvatar}
                                         />
                                     )}
                                     <div className={classes.userMeta}>
                                         <span className={classes.username}>
                                             <User size={16} />
-                                            {recommendation.createdBy.username}
+                                            {matchExperience.createdBy.username}
                                         </span>
                                         <span className={classes.userDate}>
                                             Member since{' '}
-                                            {new Date(recommendation.createdBy.createdAt).toLocaleDateString()}
+                                            {new Date(matchExperience.createdBy.createdAt).toLocaleDateString()}
                                         </span>
                                     </div>
                                 </div>
