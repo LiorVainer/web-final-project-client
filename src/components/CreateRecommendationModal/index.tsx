@@ -7,10 +7,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import styles from './CreateRecommendationModal.module.scss';
 import { RecommendationService } from '@/api/services/recommendation.service';
-import { MatchService } from '@/api/services/match.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
-import { Country, League, Team, Venue } from '@/models/match.model';
 import { ROUTES } from '@/constants/routes.const';
 
 const RecommendationSchema = Yup.object().shape({
@@ -22,8 +20,15 @@ const RecommendationSchema = Yup.object().shape({
     league: Yup.string().required('League is required'),
     homeTeam: Yup.string().required('Home Team is required'),
     awayTeam: Yup.string().required('Away Team is required'),
-    date: Yup.date().required('Match date is required'),
+    matchDate: Yup.date().required('Match date is required'),
 });
+
+export const fetchData = <T,>(key: string, param: any, fetchFn: (param: any) => Promise<T>) =>
+    useQuery<T>({
+        queryKey: [key, param],
+        queryFn: async () => (param ? fetchFn(param) : Promise.resolve([] as T)),
+        enabled: !!param,
+    });
 
 type CreateRecommendationModalProps = {
     isOpen: boolean;
@@ -36,17 +41,13 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedCountry, setSelectedCountry] = useState<string>('');
     const [selectedLeague, setSelectedLeague] = useState<number>();
-    const [uploading, setUploading] = useState(false);
 
-    const { mutate: uploadImage } = useMutation({
+    const { mutate: uploadImage, isPending } = useMutation({
         mutationFn: async (file: File) => {
             const formData = new FormData();
             formData.append('file', file);
             const { data } = await FileService.handleUpload(formData);
             return data;
-        },
-        onMutate: () => {
-            setUploading(true);
         },
         onSuccess: (data) => {
             if (data.url) {
@@ -61,45 +62,12 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
         onError: () => {
             message.error('Upload error');
         },
-        onSettled: () => {
-            setUploading(false);
-        },
     });
 
-    const { data: countries = [] } = useQuery<Country[]>({
-        queryKey: ['countries'],
-        queryFn: async () => {
-            return SoccerService.getCountries();
-        },
-        enabled: !!isOpen,
-    });
-
-    const { data: leagues = [] } = useQuery<{ league: League; country: Country }[]>({
-        queryKey: ['leagues', selectedCountry],
-        queryFn: async () => {
-            if (!selectedCountry) return [];
-            return SoccerService.getLeagues(selectedCountry);
-        },
-        enabled: !!selectedCountry,
-    });
-
-    const { data: stadiums = [] } = useQuery<Venue[]>({
-        queryKey: ['stadiums', selectedCountry],
-        queryFn: async () => {
-            if (!selectedCountry) return [];
-            return SoccerService.getVenues(selectedCountry);
-        },
-        enabled: !!selectedCountry,
-    });
-
-    const { data: teams = [] } = useQuery<{ team: Team; venue: Venue }[]>({
-        queryKey: ['teams', selectedLeague],
-        queryFn: async () => {
-            if (!selectedLeague) return [];
-            return SoccerService.getTeams(selectedLeague);
-        },
-        enabled: !!selectedLeague,
-    });
+    const { data: countries = [] } = fetchData('countries', isOpen, SoccerService.getCountries);
+    const { data: leagues = [] } = fetchData('leagues', selectedCountry, SoccerService.getLeagues);
+    const { data: stadiums = [] } = fetchData('stadiums', selectedCountry, SoccerService.getVenues);
+    const { data: teams = [] } = fetchData('teams', selectedLeague, SoccerService.getTeams);
 
     const {
         control,
@@ -112,31 +80,15 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
     });
 
     const onSubmit = async (values: CreateRecommendationModalValues) => {
-        const { title, description, country, date, stadium, league, homeTeam, awayTeam } = values;
+        // const { title, description, country, date, stadium, league, homeTeam, awayTeam } = values;
         try {
-            const match = await MatchService.createMatch({
-                country,
-                stadium,
-                league,
-                date,
-                homeTeam,
-                awayTeam,
+            await RecommendationService.createRecommendation({
+                ...values,
+                picture: imageUrl,
+                createdBy: '123412341234123412341234',
             });
 
-            if (match) {
-                await RecommendationService.createRecommendation({
-                    title,
-                    description,
-                    matchId: match._id,
-                    picture: imageUrl,
-                    createdBy: '123412341234123412341234',
-                });
-
-                message.success('Recommendation created successfully');
-            } else {
-                message.error('Failed to create match');
-                return;
-            }
+            message.success('Recommendation created successfully');
 
             reset();
             setImageUrl('');
@@ -244,7 +196,7 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
 
                 <Form.Item label="Match Date">
                     <Controller
-                        name="date"
+                        name="matchDate"
                         control={control}
                         render={({ field }) => <DatePicker {...field} style={{ width: '100%' }} />}
                     />
@@ -273,17 +225,17 @@ const CreateRecommendationModal = ({ isOpen, onClose }: CreateRecommendationModa
                         }}
                         showUploadList={false}
                     >
-                        <Button icon={<UploadOutlined />} loading={uploading}>
+                        <Button icon={<UploadOutlined />} loading={isPending}>
                             Upload Image
                         </Button>
                     </Upload>
 
                     {imageUrl && (
-                        <div className="image-preview-container">
+                        <div className={styles['image-preview-container']}>
                             <img
                                 src={`${ROUTES.publicRoute}${imageUrl}`}
                                 alt="Uploaded Preview"
-                                className="image-preview"
+                                className={styles['image-preview']}
                             />
                         </div>
                     )}

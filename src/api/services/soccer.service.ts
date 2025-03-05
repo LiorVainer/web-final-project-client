@@ -1,3 +1,4 @@
+import { Country, League, Team, Venue } from '@/types/soccer.types';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/soccer';
@@ -5,7 +6,7 @@ export const ROUTE_PREFIX = '/soccer';
 export const SoccerService = {
     async getCountries() {
         try {
-            const { data } = await axiosInstance.get(`${ROUTE_PREFIX}/countries`);
+            const { data } = await axiosInstance.get<Country[]>(`${ROUTE_PREFIX}/countries`);
             return data;
         } catch (error) {
             console.error('Error fetching countries:', (error as any).message);
@@ -15,7 +16,7 @@ export const SoccerService = {
 
     async getLeagues(country: string) {
         try {
-            const { data } = await axiosInstance.get(`${ROUTE_PREFIX}/leagues`, { params: { country } });
+            const { data } = await axiosInstance.get<{ league: League; country: Country }[]>(`${ROUTE_PREFIX}/leagues`, { params: { country } });
             return data;
         } catch (error) {
             console.error('Error fetching leagues:', (error as any).message);
@@ -25,7 +26,7 @@ export const SoccerService = {
 
     async getVenues(country: string) {
         try {
-            const { data } = await axiosInstance.get(`${ROUTE_PREFIX}/venues`, { params: { country } });
+            const { data } = await axiosInstance.get<Venue[]>(`${ROUTE_PREFIX}/venues`, { params: { country } });
             return data;
         } catch (error) {
             console.error('Error fetching venues:', (error as any).message);
@@ -35,7 +36,7 @@ export const SoccerService = {
 
     async getTeams(league: number) {
         try {
-            const { data } = await axiosInstance.get(`${ROUTE_PREFIX}/teams`, { params: { league } });
+            const { data } = await axiosInstance.get<{ team: Team; venue: Venue }[]>(`${ROUTE_PREFIX}/teams`, { params: { league } });
             return data;
         } catch (error) {
             console.error('Error fetching teams:', (error as any).message);
