@@ -10,6 +10,7 @@ import { MatchExperienceService } from '@/api/services/match-experience.service'
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
 import { ROUTES } from '@/constants/routes.const';
+import { publicRoute } from '@/constants/soccer.const';
 
 const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
@@ -233,7 +234,7 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                     {imageUrl && (
                         <div className={styles['image-preview-container']}>
                             <img
-                                src={`${ROUTES.publicRoute}${imageUrl}`}
+                                src={`${publicRoute}${imageUrl}`}
                                 alt="Uploaded Preview"
                                 className={styles['image-preview']}
                             />
