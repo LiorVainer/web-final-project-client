@@ -7,8 +7,9 @@ import {
     MatchExperiencePayloadSchema,
     MatchExperienceSchema,
 } from '@/models/match-experience.model';
+import { ROUTES } from '@/constants/routes.const';
 
-export const ROUTE_PREFIX = '/match-experiences';
+export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCE;
 
 export const MatchExperienceService = {
     async getAllMatchExperience() {

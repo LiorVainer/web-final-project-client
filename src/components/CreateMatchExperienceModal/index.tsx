@@ -9,7 +9,6 @@ import styles from './CreateMatchExperienceModal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
-import { ROUTES } from '@/constants/routes.const';
 import { publicRoute } from '@/constants/soccer.const';
 
 const MatchExperienceSchema = Yup.object().shape({
@@ -24,11 +23,11 @@ const MatchExperienceSchema = Yup.object().shape({
     matchDate: Yup.date().required('Match date is required'),
 });
 
-export const fetchData = <T,>(key: string, param: any, fetchFn: (param: any) => Promise<T>) =>
-    useQuery<T>({
+export const useQueryOnDefinedParam = <T, P>(key: string, param: P | undefined, fetchFn: (param: P) => Promise<T>) =>
+    useQuery({
         queryKey: [key, param],
-        queryFn: async () => (param ? fetchFn(param) : Promise.resolve([] as T)),
-        enabled: !!param,
+        queryFn: async () => (param !== undefined ? fetchFn(param) : Promise.resolve([] as T)),
+        enabled: param !== undefined,
     });
 
 type CreateMatchExperienceModalProps = {
@@ -42,6 +41,16 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedCountry, setSelectedCountry] = useState<string>('');
     const [selectedLeague, setSelectedLeague] = useState<number>();
+
+    const resetValuesOnCountryChange = (value: string) => {
+        setSelectedCountry(value);
+        setValue('country', value);
+        setValue('league', '');
+        setValue('stadium', '');
+        setValue('homeTeam', '');
+        setValue('awayTeam', '');
+        setSelectedLeague(undefined);
+    };
 
     const { mutate: uploadImage, isPending } = useMutation({
         mutationFn: async (file: File) => {
@@ -65,10 +74,10 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         },
     });
 
-    const { data: countries = [] } = fetchData('countries', isOpen, SoccerService.getCountries);
-    const { data: leagues = [] } = fetchData('leagues', selectedCountry, SoccerService.getLeagues);
-    const { data: stadiums = [] } = fetchData('stadiums', selectedCountry, SoccerService.getVenues);
-    const { data: teams = [] } = fetchData('teams', selectedLeague, SoccerService.getTeams);
+    const { data: countries = [] } = useQueryOnDefinedParam('countries', isOpen, SoccerService.getCountries);
+    const { data: leagues = [] } = useQueryOnDefinedParam('leagues', selectedCountry, SoccerService.getLeagues);
+    const { data: stadiums = [] } = useQueryOnDefinedParam('stadiums', selectedCountry, SoccerService.getVenues);
+    const { data: teams = [] } = useQueryOnDefinedParam('teams', selectedLeague, SoccerService.getTeams);
 
     const {
         control,
@@ -81,7 +90,6 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
     });
 
     const onSubmit = async (values: CreateMatchExperienceModalValues) => {
-        // const { title, description, country, date, stadium, league, homeTeam, awayTeam } = values;
         try {
             await MatchExperienceService.createMatchExperience({
                 ...values,
@@ -123,15 +131,7 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                 >
                     <AutoComplete
                         options={countries.map((option) => ({ value: option.name }))}
-                        onSelect={(value) => {
-                            setSelectedCountry(value);
-                            setValue('country', value);
-                            setValue('league', '');
-                            setValue('stadium', '');
-                            setValue('homeTeam', '');
-                            setValue('awayTeam', '');
-                            setSelectedLeague(undefined);
-                        }}
+                        onSelect={resetValuesOnCountryChange}
                         placeholder="Select a country"
                     />
                 </Form.Item>
