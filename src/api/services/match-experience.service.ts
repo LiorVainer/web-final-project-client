@@ -8,6 +8,7 @@ import {
     MatchExperienceSchema,
 } from '@/models/match-experience.model';
 import { ROUTES } from '@/constants/routes.const';
+import { OkResponseSchema } from '@/models/response.model.ts';
 
 export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCE;
 
@@ -36,6 +37,8 @@ export const MatchExperienceService = {
     async getMatchExperienceById(id: string) {
         try {
             const response = await axiosInstance.get<MatchExperience>(`${ROUTE_PREFIX}/${id}`);
+
+            console.log('response', response);
 
             const { data: matchExperience, success, error } = MatchExperienceSchema.safeParse(response.data);
 
@@ -101,13 +104,67 @@ export const MatchExperienceService = {
         }
     },
 
-    async likeMatchExperience(id: string): Promise<void> {
-        // This would be replaced with actual API call
-        console.log('Liking matchExperience:', id);
+    async likeMatchExperience(matchExpId: string, userId: string) {
+        try {
+            const response = await axiosInstance.post(`${ROUTE_PREFIX}/${matchExpId}/like`, {
+                userId,
+            });
+
+            console.log('response', response);
+
+            const { data, success, error } = OkResponseSchema.safeParse(response.data);
+
+            if (!success) {
+                console.error(error);
+            }
+
+            return data;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
     },
 
-    async addComment(id: string, comment: string): Promise<void> {
-        // This would be replaced with actual API call
-        console.log('Adding comment to matchExperience:', id, comment);
+    async unlikeMatchExperience(matchExpId: string, userId: string) {
+        try {
+            const response = await axiosInstance.post(`${ROUTE_PREFIX}/${matchExpId}/unlike`, {
+                userId,
+            });
+
+            console.log('response', response);
+
+            const { data, success, error } = OkResponseSchema.safeParse(response.data);
+
+            if (!success) {
+                console.error(error);
+            }
+
+            return data;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    },
+
+    async addComment(id: string, comment: string) {
+        try {
+            const response = await axiosInstance.post(`${ROUTE_PREFIX}/${id}/comments`, {
+                content: comment,
+                userId: '123',
+            });
+
+            console.log('response', response);
+
+            const { data, success, error } = z.string().safeParse(response.data);
+
+            if (!success) {
+                console.error(`Not valid response for deleting matchExperience with ID ${id}:`, error);
+            }
+
+            return data;
+        } catch (error) {
+            console.error(`Error deleting matchExperience with ID ${id}:`, error);
+            throw error;
+        }
     },
 } satisfies Record<string, (...args: any[]) => Promise<any>>;
