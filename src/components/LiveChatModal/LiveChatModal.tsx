@@ -9,16 +9,23 @@ import { ChatMessage } from '@/models/chat.model.ts'; // Import moment.js for fo
 
 export interface LiveChatModalProps {
     matchExperienceId: string;
-    loggedInUserId: string;
+    visitorId: string;
     creatorId: string;
+    loggedInUserId: string;
     onClose: () => void;
 }
 
-export const LiveChatModal = ({ matchExperienceId, loggedInUserId, creatorId, onClose }: LiveChatModalProps) => {
+export const LiveChatModal = ({
+    matchExperienceId,
+    visitorId,
+    creatorId,
+    loggedInUserId,
+    onClose,
+}: LiveChatModalProps) => {
     const [newMessage, setNewMessage] = useState('');
     const { messages, sendMessage, visitor, matchExperienceCreator } = useChat({
         matchExperienceId,
-        visitorId: loggedInUserId,
+        visitorId,
         matchExperienceCreatorId: creatorId,
     });
 
@@ -79,13 +86,13 @@ export const LiveChatModal = ({ matchExperienceId, loggedInUserId, creatorId, on
                 </div>
             );
         },
-        [loggedInUserId, shouldShowDateSeparator, formatMessageDate]
+        [visitorId, shouldShowDateSeparator, formatMessageDate]
     );
 
     return (
         <div className={classes.chatModal}>
             <div className={classes.chatHeader}>
-                <h3>{loggedInUserId === visitor?._id ? matchExperienceCreator?.username : visitor?.username}</h3>
+                <h3>{visitorId === visitor?._id ? matchExperienceCreator?.username : visitor?.username}</h3>
                 <button onClick={onClose}>
                     <X size={20} />
                 </button>

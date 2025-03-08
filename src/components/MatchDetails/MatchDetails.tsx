@@ -7,7 +7,7 @@ export interface MatchDetailsProps {
     matchExperience: MatchExperience;
 }
 
-export const MatchDetails = ({ matchExperience }: { matchExperience: MatchExperience }) => {
+export const MatchDetails = ({ matchExperience }: MatchDetailsProps) => {
     return (
         <div className={classes.matchDetails}>
             <div className={classes.teams}>

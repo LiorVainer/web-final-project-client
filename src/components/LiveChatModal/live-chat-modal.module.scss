@@ -39,7 +39,6 @@
 .chatMessages {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 1rem;
     padding-inline: 1rem;
     display: flex;
     flex-direction: column;
@@ -117,5 +116,5 @@
 }
 
 .scrollAnchor {
-    display: contents; // Removes it from layout while keeping it in the DOM
+    //display: contents; // Removes it from layout while keeping it in the DOM
 }

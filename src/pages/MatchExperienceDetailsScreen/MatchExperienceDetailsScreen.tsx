@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import classes from './match-experience-details-screen.module.scss';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Screen } from '@components/Screen';
 import { LiveChatModal } from '@components/LiveChatModal';
@@ -13,16 +13,20 @@ import { MatchDetails } from '@components/MatchDetails';
 import { UserInfo } from '@components/UserInfo';
 import { CommentsSection } from '@components/CommentsSection';
 import { MatchExperienceActions } from '@components/MatchExperienceActions';
+import { LiveChatsSection } from '@components/LiveChatsSection';
 
 export interface MatchExperienceDetailsScreenProps {}
 
 export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScreenProps) => {
     const { id: matchExperienceId } = useParams();
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [selectedChat, setSelectedChat] = useState<{ visitorId: string } | null>(null);
 
     if (!matchExperienceId) return null;
 
-    const currentUserId = '67cb182bdc7cc58c42357dfe';
+    // TODO: Get current user id from auth context
+    const currentUserId = '67c84091c494f0388a69261d'; // visitor
+    // const currentUserId = '67cb182bdc7cc58c42357dfe'; // creator
 
     const {
         data: matchExperience,
@@ -33,11 +37,18 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
         queryFn: () => MatchExperienceService.getMatchExperienceById(matchExperienceId),
     });
 
+    const isCreator = useMemo(() => matchExperience?.createdBy._id === currentUserId, [matchExperience, currentUserId]);
+
+    const openChat = (visitorId: string) => {
+        setSelectedChat({ visitorId });
+        setIsChatOpen(true);
+    };
+
     if (isLoading) {
         return (
             <Screen className={classes.loadingContainer}>
                 <Spin className={classes.spinner} size={'large'} />
-                <h4>Loading matchExperience...</h4>
+                <h4>Loading match experience...</h4>
             </Screen>
         );
     }
@@ -45,7 +56,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     if (error || !matchExperience) {
         return (
             <Screen>
-                <p>Error loading matchExperience</p>
+                <p>Error loading match experience</p>
             </Screen>
         );
     }
@@ -68,7 +79,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                                 likes={matchExperience.likes}
                                 liveChat={{
                                     isOpen: isChatOpen,
-                                    onClick: () => setIsChatOpen(true),
+                                    onClick: () => openChat(currentUserId), // Opens chat for visitor or creator
                                 }}
                             />
                         </div>
@@ -87,17 +98,20 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                     </div>
                 </div>
 
-                {isChatOpen && (
+                {isChatOpen && selectedChat && (
                     <LiveChatModal
                         onClose={() => setIsChatOpen(false)}
                         matchExperienceId={matchExperienceId}
                         creatorId={matchExperience.createdBy._id}
                         loggedInUserId={currentUserId}
+                        visitorId={selectedChat.visitorId}
                     />
                 )}
             </div>
 
             <CommentsSection matchExperienceId={matchExperienceId} />
+
+            {isCreator && <LiveChatsSection matchExperienceId={matchExperienceId} onChatClick={openChat} />}
         </Screen>
     );
 };

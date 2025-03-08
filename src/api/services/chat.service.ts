@@ -16,12 +16,28 @@ export const ChatService = {
             const { data: chat, success, error } = ChatSchema.safeParse(response.data);
 
             if (!success) {
-                console.error('Not valid response for fetching users:', error);
+                console.error('Not valid response for fetching chat:', error);
             }
 
             return chat;
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error('Error fetching chat:', error);
+            throw error;
+        }
+    },
+    async getChatsForMatchExperience(matchExperienceId: string) {
+        try {
+            const response = await axiosInstance.get<Chat[]>(ROUTE_PREFIX + `?matchExperienceId=${matchExperienceId}`);
+
+            const { data: chats, success, error } = ChatSchema.array().safeParse(response.data);
+
+            if (!success) {
+                console.error('Not valid response for fetching chat:', error);
+            }
+
+            return chats;
+        } catch (error) {
+            console.error('Error fetching chats:', error);
             throw error;
         }
     },

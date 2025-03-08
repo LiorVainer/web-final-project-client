@@ -32,6 +32,8 @@ export const CommentsSection = ({}: CommentsSectionProps) => {
         return <div>Error loading comments</div>;
     }
 
+    // TODO: replace with user actual img from server
+
     return (
         <div className={classes.commentsSection}>
             <h3 className={classes.commentsTitle}>Comments</h3>
