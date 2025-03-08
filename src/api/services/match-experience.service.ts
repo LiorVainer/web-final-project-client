@@ -146,11 +146,11 @@ export const MatchExperienceService = {
         }
     },
 
-    async addComment(id: string, comment: string) {
+    async addComment(id: string, comment: string, userId: string) {
         try {
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/${id}/comments`, {
                 content: comment,
-                userId: '123',
+                userId,
             });
 
             console.log('response', response);

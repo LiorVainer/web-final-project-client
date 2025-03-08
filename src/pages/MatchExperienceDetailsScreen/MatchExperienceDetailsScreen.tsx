@@ -25,8 +25,8 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     if (!matchExperienceId) return null;
 
     // TODO: Get current user id from auth context
-    const currentUserId = '67c84091c494f0388a69261d'; // visitor
-    // const currentUserId = '67cb182bdc7cc58c42357dfe'; // creator
+    // const currentUserId = '67cc3e3edc7cc58c42357e07'; // visitor
+    const currentUserId = '67c84091c494f0388a69261d'; // creator
 
     const {
         data: matchExperience,
@@ -75,13 +75,15 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                     <div className={classes.header}>
                         <div className={classes.headerLeft}>
                             <MatchDetails matchExperience={matchExperience} />
-                            <MatchExperienceActions
-                                likes={matchExperience.likes}
-                                liveChat={{
-                                    isOpen: isChatOpen,
-                                    onClick: () => openChat(currentUserId), // Opens chat for visitor or creator
-                                }}
-                            />
+                            {isCreator && (
+                                <MatchExperienceActions
+                                    like={{ likes: matchExperience.likes, disabled: isCreator }}
+                                    liveChat={{
+                                        isOpen: isChatOpen,
+                                        onClick: () => openChat(currentUserId),
+                                    }}
+                                />
+                            )}
                         </div>
                         <div className={classes.headerRight}>
                             <div className={classes.experienceContent}>
@@ -109,7 +111,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                 )}
             </div>
 
-            <CommentsSection matchExperienceId={matchExperienceId} />
+            <CommentsSection matchExperienceId={matchExperienceId} loggedInUserId={currentUserId} />
 
             {isCreator && <LiveChatsSection matchExperienceId={matchExperienceId} onChatClick={openChat} />}
         </Screen>

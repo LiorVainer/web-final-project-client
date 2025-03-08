@@ -4,7 +4,11 @@ import { Chat, ChatMessage, ChatMessageSchema, GetChatQueryParams, SendMessagePa
 import { ChatService } from '@api/services/chat.service.ts';
 import { SERVER_URL } from '@api/config/axios-instance.ts';
 
-export const useChat = (chatParams: GetChatQueryParams) => {
+export type UseChatProps = GetChatQueryParams & {
+    loggedInUserId: string;
+};
+
+export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
     const [chat, setChat] = useState<Chat | null>(null);
     const socketRef = useRef<Socket | null>(null); // Persist socket across renders
 
@@ -15,13 +19,10 @@ export const useChat = (chatParams: GetChatQueryParams) => {
             });
             ChatService.getChat(chatParams).then((chat) => chat && setChat(chat));
         }
-        console.log('chatParams', chatParams);
+        console.log('Chat Params:', chatParams);
 
         socketRef.current.emit('joinRoom', chatParams);
 
-        // Fetch existing chat messages from API
-
-        // Receive new messages in real-time
         socketRef.current.on('receiveMessage', (message: ChatMessage) => {
             const parsed = ChatMessageSchema.safeParse(message);
 
@@ -49,20 +50,19 @@ export const useChat = (chatParams: GetChatQueryParams) => {
                 socketRef.current = null;
             }
         };
-    }, []);
+    }, [chatParams.visitorId]);
 
     const sendMessage = (content: string) => {
-        const { matchExperienceId, matchExperienceCreatorId, visitorId } = chatParams;
+        const { matchExperienceId } = chatParams;
         const messagePayload: SendMessagePayload = {
             matchExperienceId,
-            senderId: visitorId,
-            receiverId: matchExperienceCreatorId,
+            senderId: loggedInUserId,
+            visitorId: chatParams.visitorId,
             content,
         };
 
-        console.log('messagePayload', messagePayload);
-
         if (socketRef.current) {
+            console.log('📤 Sending message:', messagePayload);
             socketRef.current.emit('sendMessage', messagePayload);
         }
     };

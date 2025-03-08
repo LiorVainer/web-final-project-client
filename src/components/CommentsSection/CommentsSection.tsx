@@ -8,14 +8,14 @@ import { useState } from 'react';
 import { MatchExperienceService } from '@api/services/match-experience.service.ts';
 import clsx from 'clsx';
 import { Loader, Send } from 'lucide-react';
-import { useParams } from 'react-router';
 
+// TODO - remove prop drilling of loggedInUserId and use auth context instead
 export interface CommentsSectionProps {
     matchExperienceId: string;
+    loggedInUserId: string;
 }
 
-export const CommentsSection = ({}: CommentsSectionProps) => {
-    const { id: matchExperienceId } = useParams();
+export const CommentsSection = ({ matchExperienceId, loggedInUserId }: CommentsSectionProps) => {
     const {
         data: matchExperience,
         isLoading,
@@ -56,20 +56,22 @@ export const CommentsSection = ({}: CommentsSectionProps) => {
                 ))}
             </div>
 
-            <NewCommentInput matchExperienceId={matchExperience._id} />
+            <NewCommentInput matchExperienceId={matchExperience._id} loggedInUserId={loggedInUserId} />
         </div>
     );
 };
 
+// TODO - remove prop drilling of loggedInUserId and use auth context instead
 interface NewCommentInputProps {
     matchExperienceId: string;
+    loggedInUserId: string;
 }
 
-const NewCommentInput = ({ matchExperienceId }: NewCommentInputProps) => {
+const NewCommentInput = ({ matchExperienceId, loggedInUserId }: NewCommentInputProps) => {
     const queryClient = useQueryClient();
     const [newComment, setNewComment] = useState('');
     const commentMutation = useMutation({
-        mutationFn: (comment: string) => MatchExperienceService.addComment(matchExperienceId, comment),
+        mutationFn: (comment: string) => MatchExperienceService.addComment(matchExperienceId, comment, loggedInUserId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] });
             setNewComment('');

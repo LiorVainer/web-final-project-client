@@ -11,9 +11,9 @@ export const MatchDetails = ({ matchExperience }: MatchDetailsProps) => {
     return (
         <div className={classes.matchDetails}>
             <div className={classes.teams}>
-                <span>Real Madrid</span>
+                <span>{matchExperience.homeTeam}</span>
                 <span>vs</span>
-                <span>Barcelona</span>
+                <span>{matchExperience.awayTeam}</span>
             </div>
             <div className={classes.matchMeta}>
                 <div>

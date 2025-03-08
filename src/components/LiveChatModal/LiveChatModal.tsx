@@ -26,6 +26,7 @@ export const LiveChatModal = ({
     const { messages, sendMessage, visitor, matchExperienceCreator } = useChat({
         matchExperienceId,
         visitorId,
+        loggedInUserId,
         matchExperienceCreatorId: creatorId,
     });
 
@@ -40,11 +41,10 @@ export const LiveChatModal = ({
     const handleSendMessage = () => {
         if (newMessage.trim()) {
             sendMessage(newMessage);
-            setNewMessage(''); // Clear input after sending
+            setNewMessage('');
         }
     };
 
-    // Determines the label for each message's date
     const formatMessageDate = useCallback((date: Date | undefined) => {
         const messageDate = moment(date);
         const today = moment().startOf('day');
@@ -55,7 +55,6 @@ export const LiveChatModal = ({
         return messageDate.format('MMMM D, YYYY'); // Example: "March 7, 2024"
     }, []);
 
-    // Determines if a date separator should be shown
     const shouldShowDateSeparator = useCallback(
         (index: number) => {
             if (index === 0) return true; // Always show separator for first message
@@ -66,7 +65,6 @@ export const LiveChatModal = ({
         [messages, formatMessageDate]
     );
 
-    // Renders a chat message
     const renderMessage = useCallback(
         (msg: ChatMessage, index: number) => {
             const showDateSeparator = shouldShowDateSeparator(index);
@@ -92,7 +90,7 @@ export const LiveChatModal = ({
     return (
         <div className={classes.chatModal}>
             <div className={classes.chatHeader}>
-                <h3>{visitorId === visitor?._id ? matchExperienceCreator?.username : visitor?.username}</h3>
+                <h3>{visitorId === loggedInUserId ? matchExperienceCreator?.username : visitor?.username}</h3>
                 <button onClick={onClose}>
                     <X size={20} />
                 </button>

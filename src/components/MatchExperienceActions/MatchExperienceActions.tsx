@@ -8,14 +8,17 @@ import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import classes from './match-experience-actions.module.scss';
 
 interface MatchExperienceActionsProps {
-    likes: string[];
+    like: {
+        likes: string[];
+        disabled: boolean;
+    };
     liveChat: {
         isOpen: boolean;
         onClick: () => void;
     };
 }
 
-export const MatchExperienceActions = ({ liveChat, likes }: MatchExperienceActionsProps) => {
+export const MatchExperienceActions = ({ liveChat, like: { likes, disabled } }: MatchExperienceActionsProps) => {
     const queryClient = useQueryClient();
     const { id: matchExperienceId } = useParams();
 
@@ -48,6 +51,13 @@ export const MatchExperienceActions = ({ liveChat, likes }: MatchExperienceActio
 
     const isLiked = useMemo(() => likes.includes(currentUserId), [likes]);
 
+    const isLikedDisabled = useMemo(() => {
+        if (disabled) {
+            return true;
+        }
+        return isLiked ? isLikePending : isUnlikePending;
+    }, [disabled]);
+
     return (
         <div className={classes.actions}>
             <button
@@ -59,7 +69,7 @@ export const MatchExperienceActions = ({ liveChat, likes }: MatchExperienceActio
                     isLiked ? classes.liked : classes.unliked
                 )}
                 onClick={isLiked ? onUnlikePress : onLikePress}
-                disabled={isLiked ? isLikePending : isUnlikePending}
+                disabled={isLikedDisabled}
             >
                 <Heart size={15} />
                 <span>{likes.length}</span>
