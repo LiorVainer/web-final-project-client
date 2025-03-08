@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router';
 import clsx from 'clsx';
@@ -47,8 +47,6 @@ export const MatchExperienceActions = ({ liveChat, likes }: MatchExperienceActio
     };
 
     const isLiked = useMemo(() => likes.includes(currentUserId), [likes]);
-
-    console.log(isLiked);
 
     return (
         <div className={classes.actions}>

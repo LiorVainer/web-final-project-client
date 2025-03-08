@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import classes from './match-experience-details-screen.module.scss';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Screen } from '@components/Screen';
 import { LiveChatModal } from '@components/LiveChatModal';
@@ -21,6 +21,8 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     const [isChatOpen, setIsChatOpen] = useState(false);
 
     if (!matchExperienceId) return null;
+
+    const currentUserId = '67cb182bdc7cc58c42357dfe';
 
     const {
         data: matchExperience,
@@ -85,7 +87,14 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                     </div>
                 </div>
 
-                {isChatOpen && <LiveChatModal onClose={() => setIsChatOpen(false)} messages={[]} />}
+                {isChatOpen && (
+                    <LiveChatModal
+                        onClose={() => setIsChatOpen(false)}
+                        matchExperienceId={matchExperienceId}
+                        creatorId={matchExperience.createdBy._id}
+                        loggedInUserId={currentUserId}
+                    />
+                )}
             </div>
 
             <CommentsSection matchExperienceId={matchExperienceId} />

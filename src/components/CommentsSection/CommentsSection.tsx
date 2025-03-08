@@ -4,7 +4,7 @@ import { MatchExperience } from '@/models/match-experience.model';
 import { Input, Spin } from 'antd';
 import classes from './comments-section.module.scss';
 import moment from 'moment';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MatchExperienceService } from '@api/services/match-experience.service.ts';
 import clsx from 'clsx';
 import { Loader, Send } from 'lucide-react';
@@ -86,6 +86,7 @@ const NewCommentInput = ({ matchExperienceId }: NewCommentInputProps) => {
             <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
+                onPressEnter={handleAddComment}
                 placeholder="Add a comment..."
                 disabled={commentMutation.isPending}
             />

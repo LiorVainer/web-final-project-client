@@ -1,7 +1,6 @@
 import { MatchExperience } from '@/models/match-experience.model';
 import moment from 'moment';
 import classes from './user-info.module.scss';
-import React from 'react';
 
 interface UserInfoProps {
     user: MatchExperience['createdBy'];
