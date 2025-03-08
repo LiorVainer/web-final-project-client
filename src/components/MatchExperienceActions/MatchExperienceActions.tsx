@@ -7,24 +7,23 @@ import { MatchExperienceService } from '@/api/services/match-experience.service'
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import classes from './match-experience-actions.module.scss';
 
+// TODO - remove prop drilling of likes and use auth context instead
 interface MatchExperienceActionsProps {
-    like: {
-        likes: string[];
-        disabled: boolean;
-    };
+    likes: string[];
+    isCreator: boolean;
+    currentUserId: string;
     liveChat: {
         isOpen: boolean;
         onClick: () => void;
     };
 }
 
-export const MatchExperienceActions = ({ liveChat, like: { likes, disabled } }: MatchExperienceActionsProps) => {
+export const MatchExperienceActions = ({ liveChat, likes, isCreator, currentUserId }: MatchExperienceActionsProps) => {
     const queryClient = useQueryClient();
     const { id: matchExperienceId } = useParams();
 
     if (!matchExperienceId) return null;
 
-    const currentUserId = '67cb182bdc7cc58c42357dfe';
     const { mutate: likeMutate, isPending: isLikePending } = useMutation({
         mutationFn: () => MatchExperienceService.likeMatchExperience(matchExperienceId, currentUserId),
         onSuccess: () => {
@@ -52,11 +51,11 @@ export const MatchExperienceActions = ({ liveChat, like: { likes, disabled } }: 
     const isLiked = useMemo(() => likes.includes(currentUserId), [likes]);
 
     const isLikedDisabled = useMemo(() => {
-        if (disabled) {
+        if (isCreator) {
             return true;
         }
         return isLiked ? isLikePending : isUnlikePending;
-    }, [disabled]);
+    }, [isCreator, isLiked, isLikePending, isUnlikePending]);
 
     return (
         <div className={classes.actions}>
@@ -75,15 +74,17 @@ export const MatchExperienceActions = ({ liveChat, like: { likes, disabled } }: 
                 <span>{likes.length}</span>
             </button>
 
-            <button
-                className={clsx(classes.liveChatButton, {
-                    [classes.active]: liveChat.isOpen,
-                })}
-                onClick={liveChat.onClick}
-            >
-                <MessageCircle size={15} />
-                <span>Live Chat</span>
-            </button>
+            {!isCreator && (
+                <button
+                    className={clsx(classes.liveChatButton, {
+                        [classes.active]: liveChat.isOpen,
+                    })}
+                    onClick={liveChat.onClick}
+                >
+                    <MessageCircle size={15} />
+                    <span>Live Chat</span>
+                </button>
+            )}
         </div>
     );
 };

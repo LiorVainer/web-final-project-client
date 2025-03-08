@@ -75,15 +75,15 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                     <div className={classes.header}>
                         <div className={classes.headerLeft}>
                             <MatchDetails matchExperience={matchExperience} />
-                            {isCreator && (
-                                <MatchExperienceActions
-                                    like={{ likes: matchExperience.likes, disabled: isCreator }}
-                                    liveChat={{
-                                        isOpen: isChatOpen,
-                                        onClick: () => openChat(currentUserId),
-                                    }}
-                                />
-                            )}
+                            <MatchExperienceActions
+                                likes={matchExperience.likes}
+                                isCreator={isCreator}
+                                currentUserId={currentUserId}
+                                liveChat={{
+                                    isOpen: isChatOpen,
+                                    onClick: () => openChat(currentUserId),
+                                }}
+                            />
                         </div>
                         <div className={classes.headerRight}>
                             <div className={classes.experienceContent}>

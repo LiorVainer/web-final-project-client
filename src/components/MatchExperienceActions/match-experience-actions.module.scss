@@ -1,15 +1,15 @@
 @use '../../theme/theme' as *;
 
 .actions {
-  display: grid;
+  display: flex;
   gap: 1rem;
-  grid-template-columns: 1fr 1fr;
 }
 
 .liveChatButton {
   @include text-icon-button($action, #fff);
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
+  flex: 1;
 
   & > svg {
     min-width: 1rem;
@@ -23,6 +23,7 @@
 .likeButton {
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
+  flex: 1;
   & > svg {
     min-width: 1rem;
     line-height: 0.8rem;
