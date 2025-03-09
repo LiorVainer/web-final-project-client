@@ -1,5 +1,7 @@
 import CreateMatchExperienceModal from '@/components/CreateMatchExperienceModal';
 import classes from './home-screen.module.scss';
+import { PlusOutlined } from '@ant-design/icons';
+import { FaFutbol } from 'react-icons/fa';
 import { useQueryService } from '@api/hooks/service.query.ts';
 import { UsersService } from '@api/services/users.service.ts';
 import { Button } from 'antd';
@@ -44,17 +46,21 @@ export const HomeScreen = ({}: HomeScreenProps) => {
                 <div>No matchExperiences found.</div>
             )}
             <button className={classes.button}>Press Me</button>
-            <button className={classes.button} onClick={() => setIsModalOpen(true)}>
-                Create MatchExperience
+            <button className={classes.floatingButton} onClick={() => setIsModalOpen(true)}>
+                <FaFutbol className={classes.icon} />
+                <div className={classes.plusIcon}>
+                    <PlusOutlined />
+                </div>
             </button>
-
-            <CreateMatchExperienceModal
-                isOpen={isModalOpen}
-                onClose={() => {
-                    setIsModalOpen(false);
-                    refetch(); // Trigger refetch of matchExperiences when modal closes
-                }}
-            />
+            {isModalOpen && (
+                <CreateMatchExperienceModal
+                    isOpen={isModalOpen}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        refetch();
+                    }}
+                />
+            )}
         </div>
     );
 };

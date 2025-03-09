@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, Form, Input, Button, AutoComplete, Upload, message, DatePicker, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import * as Yup from 'yup';
@@ -41,16 +41,20 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedCountry, setSelectedCountry] = useState<string>('');
     const [selectedLeague, setSelectedLeague] = useState<number>();
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [teams, setTeams] = useState<any[]>([]);
 
-    const resetValuesOnCountryChange = (value: string) => {
-        setSelectedCountry(value);
-        setValue('country', value);
-        setValue('league', '');
-        setValue('stadium', '');
-        setValue('homeTeam', '');
-        setValue('awayTeam', '');
-        setSelectedLeague(undefined);
-    };
+    const {
+        control,
+        handleSubmit,
+        setValue,
+        reset,
+        getValues,
+        trigger,
+        formState: { errors },
+    } = useForm<CreateMatchExperienceModalValues>({
+        resolver: yupResolver(MatchExperienceSchema),
+    });
 
     const { mutate: uploadImage, isPending } = useMutation({
         mutationFn: async (file: File) => {
@@ -74,22 +78,72 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         },
     });
 
-    const { data: countries = [] } = useQueryOnDefinedParam('countries', isOpen, SoccerService.getCountries);
-    const { data: leagues = [] } = useQueryOnDefinedParam('leagues', selectedCountry, SoccerService.getLeagues);
-    const { data: stadiums = [] } = useQueryOnDefinedParam('stadiums', selectedCountry, SoccerService.getVenues);
-    const { data: teams = [] } = useQueryOnDefinedParam('teams', selectedLeague, SoccerService.getTeams);
+    const handleYear = (date: Date): number => {
+        return date.getMonth() >= 6 ? date.getFullYear() : date.getFullYear() - 1;
+    };
 
-    const {
-        control,
-        handleSubmit,
-        setValue,
-        reset,
-        formState: { errors },
-    } = useForm<CreateMatchExperienceModalValues>({
-        resolver: yupResolver(MatchExperienceSchema),
-    });
+    const { data: countries = [] } = useQueryOnDefinedParam('countries', isOpen, SoccerService.getCountries);
+    const { data: leagues = [] } = useQueryOnDefinedParam(
+        'leagues',
+        selectedCountry ? selectedCountry : undefined,
+        SoccerService.getLeagues
+    );
+    const { data: stadiums = [] } = useQueryOnDefinedParam(
+        'stadiums',
+        selectedCountry ? selectedCountry : undefined,
+        SoccerService.getVenues
+    );
+
+    useEffect(() => {
+        if (selectedLeague !== undefined && selectedDate !== null) {
+            const season = handleYear(new Date(selectedDate));
+            SoccerService.getTeams({ leagueId: selectedLeague, season }).then((data) => setTeams(data));
+        }
+    }, [selectedLeague, selectedDate]);
+
+    const resetValuesOnCountryChange = (value: string) => {
+        setSelectedCountry(value);
+        setValue('country', value);
+        setValue('league', '');
+        setValue('stadium', '');
+        setValue('homeTeam', '');
+        setValue('awayTeam', '');
+        setSelectedLeague(undefined);
+        setTeams([]);
+        trigger('country');
+    };
+
+    const resetValuesOnLeagueChange = (value: string, id: number | undefined) => {
+        setSelectedLeague(id);
+        setValue('league', value);
+        setValue('homeTeam', '');
+        setValue('awayTeam', '');
+        setTeams([]);
+        trigger('league');
+    };
+
+    const resetValuesOnChange = (key: keyof CreateMatchExperienceModalValues, value: string) => {
+        setValue(key, value);
+        trigger(key);
+    };
+
+    const onDateChange = (date: Date | null) => {
+        setSelectedDate(date);
+        if (date) {
+            setValue('matchDate', date);
+            setValue('homeTeam', '');
+            setValue('awayTeam', '');
+            setTeams([]);
+            trigger('matchDate');
+        } else {
+            trigger('matchDate');
+        }
+    };
 
     const onSubmit = async (values: CreateMatchExperienceModalValues) => {
+        const isValid = await trigger();
+        if (!isValid) return;
+
         try {
             await MatchExperienceService.createMatchExperience({
                 ...values,
@@ -98,11 +152,12 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
             });
 
             message.success('MatchExperience created successfully');
-
             reset();
             setImageUrl('');
             setSelectedCountry('');
             setSelectedLeague(undefined);
+            setSelectedDate(null);
+            setTeams([]);
             onClose();
         } catch (error) {
             message.error('An error occurred while submitting the matchExperience.');
@@ -111,13 +166,15 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
 
     return (
         <Modal
-            title="Create MatchExperience"
+            title="Create your match experience"
             open={isOpen}
             onCancel={() => {
                 reset();
                 setImageUrl('');
                 setSelectedCountry('');
                 setSelectedLeague(undefined);
+                setSelectedDate(null);
+                setTeams([]);
                 onClose();
             }}
             footer={null}
@@ -125,28 +182,43 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         >
             <Form layout="vertical" className={styles.form} onFinish={handleSubmit(onSubmit)}>
                 <Form.Item
+                    label="Match Date"
+                    validateStatus={errors.matchDate ? 'error' : ''}
+                    help={errors.matchDate?.message}
+                >
+                    <Controller
+                        name="matchDate"
+                        control={control}
+                        render={({ field }) => (
+                            <DatePicker {...field} style={{ width: '100%' }} onChange={onDateChange} />
+                        )}
+                    />
+                </Form.Item>
+
+                <Form.Item
                     label="Country"
                     validateStatus={errors.country ? 'error' : ''}
                     help={errors.country?.message}
                 >
                     <AutoComplete
+                        value={getValues('country')}
                         options={countries.map((option) => ({ value: option.name }))}
                         onSelect={resetValuesOnCountryChange}
+                        onClear={() => resetValuesOnCountryChange('')}
                         placeholder="Select a country"
+                        allowClear
                     />
                 </Form.Item>
 
                 <Form.Item label="League" validateStatus={errors.league ? 'error' : ''} help={errors.league?.message}>
                     <AutoComplete
+                        value={getValues('league')}
                         options={leagues.map((option) => ({ value: option.league.name, id: option.league.id }))}
-                        onSelect={(value, option) => {
-                            setSelectedLeague(option.id);
-                            setValue('league', value);
-                            setValue('homeTeam', '');
-                            setValue('awayTeam', '');
-                        }}
+                        onSelect={(value, option) => resetValuesOnLeagueChange(value, option.id)}
+                        onClear={() => resetValuesOnLeagueChange('', undefined)}
                         placeholder="Select a league"
                         disabled={!selectedCountry}
+                        allowClear
                     />
                 </Form.Item>
 
@@ -156,10 +228,13 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                     help={errors.stadium?.message}
                 >
                     <AutoComplete
+                        value={getValues('stadium')}
                         options={stadiums.map((option) => ({ value: option.name }))}
-                        onSelect={(value) => setValue('stadium', value)}
+                        onSelect={(value) => resetValuesOnChange('stadium', value)}
+                        onClear={() => resetValuesOnChange('stadium', '')}
                         placeholder="Select a stadium"
                         disabled={!selectedCountry}
+                        allowClear
                     />
                 </Form.Item>
 
@@ -171,10 +246,15 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                             help={errors.homeTeam?.message}
                         >
                             <AutoComplete
-                                options={teams.map((option) => ({ value: option.team.name }))}
-                                onSelect={(value) => setValue('homeTeam', value)}
+                                value={getValues('homeTeam')}
+                                options={teams
+                                    .filter((team) => team.team.name !== getValues().awayTeam)
+                                    .map((option) => ({ value: option.team.name }))}
+                                onSelect={(value) => resetValuesOnChange('homeTeam', value)}
+                                onClear={() => resetValuesOnChange('homeTeam', '')}
                                 placeholder="Select home team"
-                                disabled={!selectedLeague}
+                                disabled={!selectedLeague || !selectedDate}
+                                allowClear
                             />
                         </Form.Item>
                     </Col>
@@ -186,22 +266,19 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                             help={errors.awayTeam?.message}
                         >
                             <AutoComplete
-                                options={teams.map((t) => ({ value: t.team.name }))}
-                                onSelect={(value) => setValue('awayTeam', value)}
+                                value={getValues('awayTeam')}
+                                options={teams
+                                    .filter((team) => team.team.name !== getValues().homeTeam)
+                                    .map((option) => ({ value: option.team.name }))}
+                                onSelect={(value) => resetValuesOnChange('awayTeam', value)}
+                                onClear={() => resetValuesOnChange('awayTeam', '')}
                                 placeholder="Select away team"
-                                disabled={!selectedLeague}
+                                disabled={!selectedLeague || !selectedDate}
+                                allowClear
                             />
                         </Form.Item>
                     </Col>
                 </Row>
-
-                <Form.Item label="Match Date">
-                    <Controller
-                        name="matchDate"
-                        control={control}
-                        render={({ field }) => <DatePicker {...field} style={{ width: '100%' }} />}
-                    />
-                </Form.Item>
 
                 <Form.Item label="Title" validateStatus={errors.title ? 'error' : ''} help={errors.title?.message}>
                     <Controller name="title" control={control} render={({ field }) => <Input {...field} />} />
@@ -218,33 +295,39 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                         render={({ field }) => <Input.TextArea {...field} />}
                     />
                 </Form.Item>
-                <Form.Item label="Upload Image">
+
+                <Form.Item
+                    label="Upload Image"
+                    validateStatus={errors.picture ? 'error' : ''}
+                    help={errors.picture?.message}
+                >
                     <Upload
+                        maxCount={1}
                         beforeUpload={(file) => {
                             uploadImage(file);
                             return false;
                         }}
                         showUploadList={false}
                     >
-                        <Button icon={<UploadOutlined />} loading={isPending}>
-                            Upload Image
-                        </Button>
+                        <Button icon={<UploadOutlined />}>Upload Picture</Button>
                     </Upload>
-
-                    {imageUrl && (
-                        <div className={styles['image-preview-container']}>
-                            <img
-                                src={`${publicRoute}${imageUrl}`}
-                                alt="Uploaded Preview"
-                                className={styles['image-preview']}
-                            />
-                        </div>
-                    )}
                 </Form.Item>
 
-                <Button type="primary" htmlType="submit" className={styles.submitBtn}>
-                    Submit
-                </Button>
+                {imageUrl && (
+                    <div className={styles['image-preview-container']}>
+                        <img
+                            src={`${publicRoute}${imageUrl}`}
+                            alt="Uploaded Preview"
+                            className={styles['image-preview']}
+                        />
+                    </div>
+                )}
+
+                <Form.Item>
+                    <Button type="primary" htmlType="submit" loading={isPending} className={styles.submitButton}>
+                        Submit
+                    </Button>
+                </Form.Item>
             </Form>
         </Modal>
     );
