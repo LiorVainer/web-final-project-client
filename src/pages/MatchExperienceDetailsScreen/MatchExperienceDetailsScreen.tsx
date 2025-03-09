@@ -5,8 +5,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Screen } from '@components/Screen';
 import { LiveChatModal } from '@components/LiveChatModal';
-import { Spin } from 'antd';
-import { publicRoute } from '@/constants/soccer.const.ts';
+import { Alert, Spin } from 'antd';
 import moment from 'moment';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import { MatchDetails } from '@components/MatchDetails';
@@ -14,6 +13,8 @@ import { UserInfo } from '@components/UserInfo';
 import { CommentsSection } from '@components/CommentsSection';
 import { MatchExperienceActions } from '@components/MatchExperienceActions';
 import { LiveChatsSection } from '@components/LiveChatsSection';
+import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { XCircle } from 'lucide-react';
 
 export interface MatchExperienceDetailsScreenProps {}
 
@@ -47,16 +48,22 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     if (isLoading) {
         return (
             <Screen className={classes.loadingContainer}>
-                <Spin className={classes.spinner} size={'large'} />
-                <h4>Loading match experience...</h4>
+                <Spin className={classes.spinner} size="large" />
+                <h4 className={classes.loadingText}>Fetching match experience...</h4>
             </Screen>
         );
     }
 
     if (error || !matchExperience) {
         return (
-            <Screen>
-                <p>Error loading match experience</p>
+            <Screen className={classes.errorContainer}>
+                <XCircle size={50} className={classes.errorIcon} />
+                <Alert
+                    message="Failed to load match experience"
+                    description="There was an error fetching the details. Please try again later."
+                    type="error"
+                    showIcon
+                />
             </Screen>
         );
     }
@@ -67,7 +74,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                 <div className={classes.content}>
                     {matchExperience.picture && (
                         <img
-                            src={`${publicRoute}${matchExperience.picture}`}
+                            src={getPictureFullUrl(matchExperience.picture)}
                             alt={matchExperience.title}
                             className={classes.image}
                         />
@@ -76,6 +83,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                         <div className={classes.headerLeft}>
                             <MatchDetails matchExperience={matchExperience} />
                             <MatchExperienceActions
+                                matchExperienceId={matchExperienceId}
                                 likes={matchExperience.likes}
                                 isCreator={isCreator}
                                 currentUserId={currentUserId}

@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router';
 import clsx from 'clsx';
 import { Heart, MessageCircle } from 'lucide-react';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
@@ -9,6 +8,7 @@ import classes from './match-experience-actions.module.scss';
 
 // TODO - remove prop drilling of likes and use auth context instead
 interface MatchExperienceActionsProps {
+    matchExperienceId: string;
     likes: string[];
     isCreator: boolean;
     currentUserId: string;
@@ -18,26 +18,23 @@ interface MatchExperienceActionsProps {
     };
 }
 
-export const MatchExperienceActions = ({ liveChat, likes, isCreator, currentUserId }: MatchExperienceActionsProps) => {
+export const MatchExperienceActions = ({
+    matchExperienceId,
+    liveChat,
+    likes,
+    isCreator,
+    currentUserId,
+}: MatchExperienceActionsProps) => {
     const queryClient = useQueryClient();
-    const { id: matchExperienceId } = useParams();
-
-    if (!matchExperienceId) return null;
 
     const { mutate: likeMutate, isPending: isLikePending } = useMutation({
         mutationFn: () => MatchExperienceService.likeMatchExperience(matchExperienceId, currentUserId),
-        onSuccess: () => {
-            console.log('Liked match experience');
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] });
-        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] }),
     });
 
     const { mutate: unlikeMutate, isPending: isUnlikePending } = useMutation({
         mutationFn: () => MatchExperienceService.unlikeMatchExperience(matchExperienceId, currentUserId),
-        onSuccess: () => {
-            console.log('Unliked match experience');
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] });
-        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] }),
     });
 
     const onLikePress = () => {

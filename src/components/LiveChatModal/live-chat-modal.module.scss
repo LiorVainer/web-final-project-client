@@ -19,17 +19,56 @@
 }
 
 .chatHeader {
-    padding: 1rem;
-    border-bottom: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
 
-    h3 {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #111827;
+    .userInfo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
     }
+
+    .userAvatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .userDetails {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .activeStatus {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+    }
+
+    .onlineDot {
+        width: 12px;
+        height: 12px;
+        background-color: #10b981; // Green color
+        border-radius: 50%;
+        position: absolute;
+        bottom: 2px;
+        left: 32px;
+        border: 2px solid white;
+    }
+
 
     button {
         @include text-button($text: gray-scale(50));

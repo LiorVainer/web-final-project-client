@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { Chat, ChatMessage, ChatMessageSchema, GetChatQueryParams, SendMessagePayload } from '@/models/chat.model.ts';
 import { ChatService } from '@api/services/chat.service.ts';
 import { SERVER_URL } from '@api/config/axios-instance.ts';
+import { SOCKET_EVENTS } from '@/constants/socket.const.ts';
 
 export type UseChatProps = GetChatQueryParams & {
     loggedInUserId: string;
@@ -10,6 +11,7 @@ export type UseChatProps = GetChatQueryParams & {
 
 export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
     const [chat, setChat] = useState<Chat | null>(null);
+    const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({}); // Track online status
     const socketRef = useRef<Socket | null>(null); // Persist socket across renders
 
     useEffect(() => {
@@ -17,13 +19,13 @@ export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
             socketRef.current = io(SERVER_URL, {
                 transports: ['websocket'],
             });
+
             ChatService.getChat(chatParams).then((chat) => chat && setChat(chat));
         }
-        console.log('Chat Params:', chatParams);
 
-        socketRef.current.emit('joinRoom', chatParams);
+        socketRef.current.emit(SOCKET_EVENTS.JOIN_ROOM, { ...chatParams, loggedInUserId });
 
-        socketRef.current.on('receiveMessage', (message: ChatMessage) => {
+        socketRef.current.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message: ChatMessage) => {
             const parsed = ChatMessageSchema.safeParse(message);
 
             if (!parsed.success) {
@@ -32,15 +34,20 @@ export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
             }
 
             setChat((prevChat) => {
-                if (!prevChat) {
-                    return null;
-                }
-
+                if (!prevChat) return null;
                 return {
                     ...prevChat,
                     messages: [...prevChat.messages, message],
                 };
             });
+        });
+
+        socketRef.current.on(SOCKET_EVENTS.USER_CONNECTED, ({ userId }) => {
+            setOnlineUsers((prev) => ({ ...prev, [userId]: true }));
+        });
+
+        socketRef.current.on(SOCKET_EVENTS.USER_DISCONNECTED, ({ userId }) => {
+            setOnlineUsers((prev) => ({ ...prev, [userId]: false }));
         });
 
         return () => {
@@ -63,7 +70,7 @@ export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
 
         if (socketRef.current) {
             console.log('📤 Sending message:', messagePayload);
-            socketRef.current.emit('sendMessage', messagePayload);
+            socketRef.current.emit(SOCKET_EVENTS.SEND_MESSAGE, messagePayload);
         }
     };
 
@@ -73,5 +80,6 @@ export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
         messages: chat?.messages,
         visitor: chat?.visitor,
         matchExperienceCreator: chat?.matchExperienceCreator,
+        onlineUsers,
     };
 };

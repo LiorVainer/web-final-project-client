@@ -9,7 +9,7 @@ import styles from './CreateMatchExperienceModal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
-import { publicRoute } from '@/constants/soccer.const';
+import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 
 const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
@@ -41,8 +41,6 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedCountry, setSelectedCountry] = useState<string>('');
     const [selectedLeague, setSelectedLeague] = useState<number>();
-
-    console.log('img', imageUrl);
 
     const resetValuesOnCountryChange = (value: string) => {
         setSelectedCountry(value);
@@ -236,7 +234,7 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                     {imageUrl && (
                         <div className={styles['image-preview-container']}>
                             <img
-                                src={`${publicRoute}${imageUrl}`}
+                                src={getPictureFullUrl(imageUrl)}
                                 alt="Uploaded Preview"
                                 className={styles['image-preview']}
                             />

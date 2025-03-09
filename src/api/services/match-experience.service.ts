@@ -38,8 +38,6 @@ export const MatchExperienceService = {
         try {
             const response = await axiosInstance.get<MatchExperience>(`${ROUTE_PREFIX}/${id}`);
 
-            console.log('response', response);
-
             const { data: matchExperience, success, error } = MatchExperienceSchema.safeParse(response.data);
 
             if (!success) {
@@ -110,8 +108,6 @@ export const MatchExperienceService = {
                 userId,
             });
 
-            console.log('response', response);
-
             const { data, success, error } = OkResponseSchema.safeParse(response.data);
 
             if (!success) {
@@ -130,8 +126,6 @@ export const MatchExperienceService = {
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/${matchExpId}/unlike`, {
                 userId,
             });
-
-            console.log('response', response);
 
             const { data, success, error } = OkResponseSchema.safeParse(response.data);
 
@@ -152,8 +146,6 @@ export const MatchExperienceService = {
                 content: comment,
                 userId,
             });
-
-            console.log('response', response);
 
             const { data, success, error } = z.string().safeParse(response.data);
 

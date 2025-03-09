@@ -1,9 +1,9 @@
 import classes from './live-chats-section.module.scss';
 import moment from 'moment/moment';
-import { publicRoute } from '@/constants/soccer.const.ts';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import { ChatService } from '@api/services/chat.service.ts';
+import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 
 export interface LiveChatsSectionProps {
     matchExperienceId: string;
@@ -30,7 +30,7 @@ export const LiveChatsSection = ({ matchExperienceId, onChatClick }: LiveChatsSe
                                 <div className={classes.chatUserInfo}>
                                     <img
                                         className={classes.chatUserInage}
-                                        src={`${publicRoute}${chat.visitor.pictureId}`}
+                                        src={getPictureFullUrl(chat.visitor.pictureId)}
                                     />
                                     <p className={classes.chatUser}>{chat.visitor.username}</p>
                                 </div>

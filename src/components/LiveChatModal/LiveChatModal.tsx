@@ -1,5 +1,5 @@
 import classes from './live-chat-modal.module.scss';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Send, X } from 'lucide-react';
 import clsx from 'clsx';
 import { Input } from 'antd';
@@ -23,12 +23,19 @@ export const LiveChatModal = ({
     onClose,
 }: LiveChatModalProps) => {
     const [newMessage, setNewMessage] = useState('');
-    const { messages, sendMessage, visitor, matchExperienceCreator } = useChat({
+    const { messages, sendMessage, visitor, matchExperienceCreator, onlineUsers } = useChat({
         matchExperienceId,
         visitorId,
         loggedInUserId,
         matchExperienceCreatorId: creatorId,
     });
+
+    console.log(onlineUsers, loggedInUserId, visitorId);
+
+    const isOtherUserOnline = useMemo(
+        () => (loggedInUserId === visitorId ? onlineUsers[creatorId] : onlineUsers[visitorId]),
+        [onlineUsers, loggedInUserId, visitorId, creatorId]
+    );
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -90,7 +97,18 @@ export const LiveChatModal = ({
     return (
         <div className={classes.chatModal}>
             <div className={classes.chatHeader}>
-                <h3>{visitorId === loggedInUserId ? matchExperienceCreator?.username : visitor?.username}</h3>
+                <div className={classes.userInfo}>
+                    <img
+                        src={visitorId === loggedInUserId ? matchExperienceCreator?.pictureId : visitor?.pictureId}
+                        alt="User"
+                        className={classes.userAvatar}
+                    />
+                    <div className={classes.userDetails}>
+                        <h3>{visitorId === loggedInUserId ? matchExperienceCreator?.username : visitor?.username}</h3>
+                        {isOtherUserOnline ? <p className={classes.activeStatus}>Active now</p> : null}
+                    </div>
+                    {isOtherUserOnline && <span className={classes.onlineDot}></span>}
+                </div>
                 <button onClick={onClose}>
                     <X size={20} />
                 </button>
