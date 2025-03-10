@@ -7,10 +7,7 @@ export const ChatService = {
     async getChat({ matchExperienceId, matchExperienceCreatorId, visitorId }: GetChatQueryParams) {
         try {
             const response = await axiosInstance.get<Chat>(
-                ROUTE_PREFIX +
-                    `?matchExperienceId=${matchExperienceId}&` +
-                    `visitorId=${visitorId}&` +
-                    `matchExperienceCreatorId=${matchExperienceCreatorId}`
+                `${ROUTE_PREFIX}?matchExperienceId=${matchExperienceId}&visitorId=${visitorId}&matchExperienceCreatorId=${matchExperienceCreatorId}`
             );
 
             const { data: chat, success, error } = ChatSchema.safeParse(response.data);
@@ -27,7 +24,7 @@ export const ChatService = {
     },
     async getChatsForMatchExperience(matchExperienceId: string) {
         try {
-            const response = await axiosInstance.get<Chat[]>(ROUTE_PREFIX + `?matchExperienceId=${matchExperienceId}`);
+            const response = await axiosInstance.get<Chat[]>(`${ROUTE_PREFIX}?matchExperienceId=${matchExperienceId}`);
 
             const { data: chats, success, error } = ChatSchema.array().safeParse(response.data);
 

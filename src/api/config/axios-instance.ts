@@ -1,4 +1,3 @@
-// src/api/axiosInstance.ts
 import axios from 'axios';
 
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL;

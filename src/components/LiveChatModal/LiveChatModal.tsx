@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import { Input } from 'antd';
 import { useChat } from '@hooks/useChat.hooks.ts';
 import moment from 'moment';
-import { ChatMessage } from '@/models/chat.model.ts'; // Import moment.js for formatting timestamps
+import { ChatMessage } from '@/models/chat.model.ts';
 
 export interface LiveChatModalProps {
     matchExperienceId: string;
@@ -29,8 +29,6 @@ export const LiveChatModal = ({
         loggedInUserId,
         matchExperienceCreatorId: creatorId,
     });
-
-    console.log(onlineUsers, loggedInUserId, visitorId);
 
     const isOtherUserOnline = useMemo(
         () => (loggedInUserId === visitorId ? onlineUsers[creatorId] : onlineUsers[visitorId]),
@@ -59,12 +57,12 @@ export const LiveChatModal = ({
 
         if (messageDate.isSame(today, 'day')) return 'Today';
         if (messageDate.isSame(yesterday, 'day')) return 'Yesterday';
-        return messageDate.format('MMMM D, YYYY'); // Example: "March 7, 2024"
+        return messageDate.format('MMMM D, YYYY');
     }, []);
 
     const shouldShowDateSeparator = useCallback(
         (index: number) => {
-            if (index === 0) return true; // Always show separator for first message
+            if (index === 0) return true;
             const currentDate = formatMessageDate(messages?.at(index)?.createdAt);
             const previousDate = formatMessageDate(messages?.at(index - 1)?.createdAt);
             return currentDate !== previousDate;

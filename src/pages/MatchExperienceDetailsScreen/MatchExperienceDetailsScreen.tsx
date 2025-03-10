@@ -7,7 +7,6 @@ import { Screen } from '@components/Screen';
 import { LiveChatModal } from '@components/LiveChatModal';
 import { Alert, Spin } from 'antd';
 import moment from 'moment';
-import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import { MatchDetails } from '@components/MatchDetails';
 import { UserInfo } from '@components/UserInfo';
 import { CommentsSection } from '@components/CommentsSection';
@@ -34,8 +33,9 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
         isLoading,
         error,
     } = useQuery({
-        queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId],
+        queryKey: ['unique-key'],
         queryFn: () => MatchExperienceService.getMatchExperienceById(matchExperienceId),
+        enabled: !!matchExperienceId,
     });
 
     const isCreator = useMemo(() => matchExperience?.createdBy._id === currentUserId, [matchExperience, currentUserId]);

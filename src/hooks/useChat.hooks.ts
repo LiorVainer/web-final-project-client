@@ -52,7 +52,6 @@ export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
 
         return () => {
             if (socketRef.current) {
-                console.log('❌ WebSocket Disconnected:', socketRef.current.id);
                 socketRef.current.disconnect();
                 socketRef.current = null;
             }
@@ -69,7 +68,6 @@ export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
         };
 
         if (socketRef.current) {
-            console.log('📤 Sending message:', messagePayload);
             socketRef.current.emit(SOCKET_EVENTS.SEND_MESSAGE, messagePayload);
         }
     };
