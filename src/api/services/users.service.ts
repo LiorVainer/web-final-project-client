@@ -9,13 +9,14 @@ export const UsersService = {
         try {
             const response = await axiosInstance.get<User[]>(ROUTE_PREFIX);
 
-            const { data: users, success, error } = UserSchema.array().safeParse(response.data);
+            const parsedResponse = UserSchema.array().safeParse(response.data);
 
-            if (!success) {
-                console.error('Not valid response for fetching users:', error);
+            if (!parsedResponse.success) {
+                console.error('Invalid response for fetching users:', parsedResponse.error);
+                return []; 
             }
 
-            return users;
+            return parsedResponse.data;
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;

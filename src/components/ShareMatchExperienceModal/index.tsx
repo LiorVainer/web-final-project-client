@@ -4,12 +4,12 @@ import { UploadOutlined } from '@ant-design/icons';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import styles from './CreateMatchExperienceModal.module.scss';
+import { useQuery } from '@tanstack/react-query';
+import styles from './share-match-experience-modal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
-import { publicRoute } from '@/constants/soccer.const';
+import { Team, Venue } from '@/types/soccer.types';
 
 const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
@@ -30,19 +30,21 @@ export const useQueryOnDefinedParam = <T, P>(key: string, param: P | undefined, 
         enabled: param !== undefined,
     });
 
-type CreateMatchExperienceModalProps = {
+type ShareMatchExperienceModalProps = {
     isOpen: boolean;
     onClose: () => void;
 };
 
-type CreateMatchExperienceModalValues = Yup.InferType<typeof MatchExperienceSchema>;
+type ShareMatchExperienceModalValues = Yup.InferType<typeof MatchExperienceSchema>;
 
-const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceModalProps) => {
+const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModalProps) => {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedCountry, setSelectedCountry] = useState<string>('');
     const [selectedLeague, setSelectedLeague] = useState<number>();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [teams, setTeams] = useState<any[]>([]);
+    const [teams, setTeams] = useState<{ team: Team; venue: Venue }[]>([]);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
 
     const {
         control,
@@ -52,33 +54,11 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         getValues,
         trigger,
         formState: { errors },
-    } = useForm<CreateMatchExperienceModalValues>({
+    } = useForm<ShareMatchExperienceModalValues>({
         resolver: yupResolver(MatchExperienceSchema),
     });
 
-    const { mutate: uploadImage, isPending } = useMutation({
-        mutationFn: async (file: File) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            const { data } = await FileService.handleUpload(formData);
-            return data;
-        },
-        onSuccess: (data) => {
-            if (data.url) {
-                message.success('Image uploaded successfully');
-                const filePath = data.url.split('/public/')[1];
-                setImageUrl(filePath);
-                setValue('picture', filePath);
-            } else {
-                message.error('Upload failed');
-            }
-        },
-        onError: () => {
-            message.error('Upload error');
-        },
-    });
-
-    const handleYear = (date: Date): number => {
+    const calculateCurrentSeason = (date: Date): number => {
         return date.getMonth() >= 6 ? date.getFullYear() : date.getFullYear() - 1;
     };
 
@@ -94,12 +74,17 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         SoccerService.getVenues
     );
 
+    const { data: fetchedTeams = [] } = useQueryOnDefinedParam(
+        'teams',
+        selectedLeague && selectedDate
+            ? { leagueId: selectedLeague, season: calculateCurrentSeason(new Date(selectedDate)) }
+            : undefined,
+        ({ leagueId, season }) => SoccerService.getTeams({ leagueId, season })
+    );
+
     useEffect(() => {
-        if (selectedLeague !== undefined && selectedDate !== null) {
-            const season = handleYear(new Date(selectedDate));
-            SoccerService.getTeams({ leagueId: selectedLeague, season }).then((data) => setTeams(data));
-        }
-    }, [selectedLeague, selectedDate]);
+        setTeams(fetchedTeams);
+    }, [fetchedTeams]);
 
     const resetValuesOnCountryChange = (value: string) => {
         setSelectedCountry(value);
@@ -122,7 +107,7 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         trigger('league');
     };
 
-    const resetValuesOnChange = (key: keyof CreateMatchExperienceModalValues, value: string) => {
+    const resetValuesOnChange = (key: keyof ShareMatchExperienceModalValues, value: string) => {
         setValue(key, value);
         trigger(key);
     };
@@ -140,14 +125,23 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         }
     };
 
-    const onSubmit = async (values: CreateMatchExperienceModalValues) => {
+    const onSubmit = async (values: ShareMatchExperienceModalValues) => {
         const isValid = await trigger();
         if (!isValid) return;
 
         try {
+            let uploadedImageUrl = imageUrl;
+
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const { data } = await FileService.handleUpload(formData);
+                uploadedImageUrl = data.url.split('/public/')[1];
+            }
+
             await MatchExperienceService.createMatchExperience({
                 ...values,
-                picture: imageUrl,
+                picture: uploadedImageUrl,
                 createdBy: '123412341234123412341234',
             });
 
@@ -166,7 +160,7 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
 
     return (
         <Modal
-            title="Create your match experience"
+            title="Share your match experience"
             open={isOpen}
             onCancel={() => {
                 reset();
@@ -297,35 +291,44 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                 </Form.Item>
 
                 <Form.Item
-                    label="Upload Image"
+                    label="Picture From The Match"
                     validateStatus={errors.picture ? 'error' : ''}
                     help={errors.picture?.message}
                 >
                     <Upload
                         maxCount={1}
                         beforeUpload={(file) => {
-                            uploadImage(file);
+                            setSelectedFile(file);
+
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                setImageUrl(e.target?.result as string);
+                            };
+                            reader.readAsDataURL(file);
+
                             return false;
                         }}
-                        showUploadList={false}
+                        onRemove={() => {
+                            setImageUrl('');
+                            setSelectedFile(null);
+                        }}
+                        showUploadList={true}
                     >
-                        <Button icon={<UploadOutlined />}>Upload Picture</Button>
+                        <Button className={styles.uploadButton} icon={<UploadOutlined />} block>
+                            Upload Your Picture
+                        </Button>
                     </Upload>
                 </Form.Item>
 
                 {imageUrl && (
-                    <div className={styles['image-preview-container']}>
-                        <img
-                            src={`${publicRoute}${imageUrl}`}
-                            alt="Uploaded Preview"
-                            className={styles['image-preview']}
-                        />
+                    <div className="image-preview-container">
+                        <img src={imageUrl} alt="Uploaded Preview" className="image-preview" />
                     </div>
                 )}
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={isPending} className={styles.submitButton}>
-                        Submit
+                    <Button type="primary" htmlType="submit" className={styles.submitButton}>
+                        Share
                     </Button>
                 </Form.Item>
             </Form>
@@ -333,4 +336,4 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
     );
 };
 
-export default CreateMatchExperienceModal;
+export default ShareMatchExperienceModal;

@@ -1,4 +1,4 @@
-import CreateMatchExperienceModal from '@/components/CreateMatchExperienceModal';
+import ShareMatchExperienceModal from '@/components/ShareMatchExperienceModal';
 import classes from './home-screen.module.scss';
 import { PlusOutlined } from '@ant-design/icons';
 import { FaFutbol } from 'react-icons/fa';
@@ -53,7 +53,7 @@ export const HomeScreen = ({}: HomeScreenProps) => {
                 </div>
             </button>
             {isModalOpen && (
-                <CreateMatchExperienceModal
+                <ShareMatchExperienceModal
                     isOpen={isModalOpen}
                     onClose={() => {
                         setIsModalOpen(false);
