@@ -14,6 +14,7 @@ import { MatchExperienceActions } from '@components/MatchExperienceActions';
 import { LiveChatsSection } from '@components/LiveChatsSection';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import { XCircle } from 'lucide-react';
+import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 
 export interface MatchExperienceDetailsScreenProps {}
 
@@ -33,7 +34,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
         isLoading,
         error,
     } = useQuery({
-        queryKey: ['unique-key'],
+        queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId],
         queryFn: () => MatchExperienceService.getMatchExperienceById(matchExperienceId),
         enabled: !!matchExperienceId,
     });
