@@ -12,8 +12,8 @@ export const Router = (_props: RouterProps) => {
         <Routes>
             <Route path="/" element={<Layout />}>
                 <Route path={ROUTES.MATCH_EXPERIENCE}>
-                    <Route index element={<MatchExperiencesCatalogScreen />}></Route>
                     <Route path=":id" element={<MatchExperienceDetailsScreen />}></Route>
+                    <Route index element={<MatchExperiencesCatalogScreen />}></Route>
                 </Route>
 
                 <Route path="/" element={<HomeScreen />} />

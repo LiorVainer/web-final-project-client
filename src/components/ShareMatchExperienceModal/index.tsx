@@ -81,7 +81,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
     );
 
     const resetTeams = () => {
-        queryClient.setQueryData(['teams'], []); 
+        queryClient.setQueryData(['teams'], []);
     };
 
     const resetValuesOnCountryChange = (value: string) => {
