@@ -11,8 +11,8 @@ export type UseChatProps = GetChatQueryParams & {
 
 export const useChat = ({ loggedInUserId, ...chatParams }: UseChatProps) => {
     const [chat, setChat] = useState<Chat | null>(null);
-    const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({}); // Track online status
-    const socketRef = useRef<Socket | null>(null); // Persist socket across renders
+    const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({});
+    const socketRef = useRef<Socket | null>(null);
 
     useEffect(() => {
         if (!socketRef.current) {
