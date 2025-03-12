@@ -1,0 +1,43 @@
+@use '../../theme/theme' as *;
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.liveChatButton {
+  @include text-icon-button($action, #fff);
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  flex: 1;
+
+  & > svg {
+    min-width: 1rem;
+    line-height: 0.9rem;
+  }
+  & > span {
+    white-space: nowrap;
+  }
+}
+
+.likeButton {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  flex: 1;
+  & > svg {
+    min-width: 1rem;
+    line-height: 0.8rem;
+  }
+  & > span {
+    white-space: nowrap;
+
+  }
+}
+
+.unliked {
+  @include outlined-text-icon-button(#fff, $red);
+}
+
+.liked {
+  @include outlined-text-icon-button($red, gray-scale(100%));
+}

@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { Modal, Form, Input, Button, AutoComplete, Upload, message, DatePicker, Row, Col } from 'antd';
+import { AutoComplete, Button, Col, DatePicker, Form, Input, message, Modal, Row, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import styles from './CreateMatchExperienceModal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
-import { publicRoute } from '@/constants/soccer.const';
+import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 
 const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
@@ -62,7 +62,7 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
         onSuccess: (data) => {
             if (data.url) {
                 message.success('Image uploaded successfully');
-                const filePath = data.url.split('/public/')[1];
+                const filePath = data.url.split('public/')[1];
                 setImageUrl(filePath);
                 setValue('picture', filePath);
             } else {
@@ -234,7 +234,7 @@ const CreateMatchExperienceModal = ({ isOpen, onClose }: CreateMatchExperienceMo
                     {imageUrl && (
                         <div className={styles['image-preview-container']}>
                             <img
-                                src={`${publicRoute}${imageUrl}`}
+                                src={getPictureFullUrl(imageUrl)}
                                 alt="Uploaded Preview"
                                 className={styles['image-preview']}
                             />

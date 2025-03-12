@@ -1,3 +1,6 @@
+@use './system' as *;
+@use './colors' as *;
+
 @mixin font {
     font-family: 'Assistant', sans-serif;
 }
@@ -11,4 +14,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+@mixin card {
+    border-radius: $system-border-radius;
+    background-color: $primary;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 3rem;
 }

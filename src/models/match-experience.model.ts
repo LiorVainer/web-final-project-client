@@ -1,14 +1,7 @@
 import { z } from 'zod';
-import { UserSchema } from '@/models/user.model.ts';
-import { zodDate } from '@/types/common.types';
-
-const CommentSchema = z.object({
-    _id: z.string(),
-    postId: z.string(),
-    userId: z.string(),
-    content: z.string(),
-    createdAt: zodDate,
-});
+import { PublicUserSchema } from '@/models/user.model.ts';
+import { CommentSchema, CommentWithIdSchema } from '@/models/comment.model.ts';
+import { zodDate } from '@/utils/zod.utils.ts';
 
 export const MatchExperiencePayloadSchema = z.object({
     _id: z.string(),
@@ -27,8 +20,8 @@ export const MatchExperiencePayloadSchema = z.object({
 export const MatchExperienceSchema = MatchExperiencePayloadSchema.extend({
     createdAt: zodDate,
     updatedAt: zodDate,
-    createdBy: UserSchema.omit({ password: true }),
-    comments: z.array(CommentSchema),
+    user: PublicUserSchema,
+    comments: z.array(CommentWithIdSchema),
 });
 
 export const CreateMatchExperienceSchema = MatchExperiencePayloadSchema.omit({ _id: true, likes: true }).extend({
