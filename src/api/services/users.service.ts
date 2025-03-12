@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { User, UserSchema } from '../../models/user.model';
+import { PublicUser, PublicUserSchema, User, UserSchema } from '../../models/user.model';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/users';
@@ -7,9 +7,9 @@ export const ROUTE_PREFIX = '/users';
 export const UsersService = {
     async getUsers() {
         try {
-            const response = await axiosInstance.get<User[]>(ROUTE_PREFIX);
+            const response = await axiosInstance.get<PublicUser[]>(ROUTE_PREFIX);
 
-            const parsedResponse = UserSchema.array().safeParse(response.data);
+            const parsedResponse = PublicUserSchema.array().safeParse(response.data);
 
             if (!parsedResponse.success) {
                 console.error('Invalid response for fetching users:', parsedResponse.error);

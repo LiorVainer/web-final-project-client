@@ -97,7 +97,7 @@ export const LiveChatModal = ({
             <div className={classes.chatHeader}>
                 <div className={classes.userInfo}>
                     <img
-                        src={visitorId === loggedInUserId ? matchExperienceCreator?.pictureId : visitor?.pictureId}
+                        src={visitorId === loggedInUserId ? matchExperienceCreator?.picture : visitor?.picture}
                         alt="User"
                         className={classes.userAvatar}
                     />
