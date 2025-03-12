@@ -30,14 +30,32 @@
   }
   & > span {
     white-space: nowrap;
-
   }
 }
 
 .unliked {
-  @include outlined-text-icon-button(#fff, $red);
+  @include outlined-text-icon-button(gray-scale(100%), $red);
 }
 
 .liked {
   @include outlined-text-icon-button($red, gray-scale(100%));
+}
+
+.deleteButton {
+  @include outlined-text-icon-button($red, gray-scale(100%));
+  flex: 1;
+  & > svg {
+    min-width: 1rem;
+    line-height: 0.9rem;
+  }
+}
+
+.editButton {
+  flex: 1;
+  @include outlined-text-icon-button(gray-scale(100%), $action);
+
+  & > svg {
+    min-width: 1rem;
+    line-height: 0.9rem;
+  }
 }
