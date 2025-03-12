@@ -20,7 +20,7 @@ export const MatchExperiencePayloadSchema = z.object({
 export const MatchExperienceSchema = MatchExperiencePayloadSchema.extend({
     createdAt: zodDate,
     updatedAt: zodDate,
-    createdBy: PublicUserSchema,
+    user: PublicUserSchema,
     comments: z.array(CommentWithIdSchema),
 });
 

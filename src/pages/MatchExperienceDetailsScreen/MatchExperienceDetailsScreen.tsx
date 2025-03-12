@@ -39,7 +39,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
         enabled: !!matchExperienceId,
     });
 
-    const isCreator = useMemo(() => matchExperience?.createdBy._id === currentUserId, [matchExperience, currentUserId]);
+    const isCreator = useMemo(() => matchExperience?.user._id === currentUserId, [matchExperience, currentUserId]);
 
     const openChat = (visitorId: string) => {
         setSelectedChat({ visitorId });
@@ -104,7 +104,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                                 </div>
                                 <p className={classes.description}>{matchExperience.description}</p>
                             </div>
-                            <UserInfo user={matchExperience.createdBy} />
+                            <UserInfo user={matchExperience.user} />
                         </div>
                     </div>
                 </div>
@@ -113,7 +113,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                     <LiveChatModal
                         onClose={() => setIsChatOpen(false)}
                         matchExperienceId={matchExperienceId}
-                        creatorId={matchExperience.createdBy._id}
+                        creatorId={matchExperience.user._id}
                         loggedInUserId={currentUserId}
                         visitorId={selectedChat.visitorId}
                     />
