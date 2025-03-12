@@ -36,7 +36,7 @@ export const HomeScreen = ({}: HomeScreenProps) => {
         <div>
             <h1>Home Screen</h1>
             {data.map((user) => (
-                <div>{user.email}</div>
+                <div key={user._id}>{user.email}</div>
             ))}
             {matchExperiences?.length ? (
                 matchExperiences.map((matchExperience) => (

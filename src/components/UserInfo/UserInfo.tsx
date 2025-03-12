@@ -3,7 +3,7 @@ import moment from 'moment';
 import classes from './user-info.module.scss';
 
 interface UserInfoProps {
-    user: MatchExperience['createdBy'];
+    user: MatchExperience['user'];
 }
 
 export const UserInfo = ({ user }: UserInfoProps) => {
@@ -11,7 +11,7 @@ export const UserInfo = ({ user }: UserInfoProps) => {
         <div className={classes.user}>
             {user && (
                 <img
-                    src={`https://picsum.photos/200/200?random=${user.pictureId}`}
+                    src={`https://picsum.photos/200/200?random=${user.picture}`}
                     alt={user.username}
                     className={classes.userAvatar}
                 />

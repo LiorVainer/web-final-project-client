@@ -30,7 +30,7 @@ export const LiveChatsSection = ({ matchExperienceId, onChatClick }: LiveChatsSe
                                 <div className={classes.chatUserInfo}>
                                     <img
                                         className={classes.chatUserInage}
-                                        src={getPictureFullUrl(chat.visitor.pictureId)}
+                                        src={getPictureFullUrl(chat.visitor.picture)}
                                     />
                                     <p className={classes.chatUser}>{chat.visitor.username}</p>
                                 </div>
