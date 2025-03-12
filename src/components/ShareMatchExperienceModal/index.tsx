@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Modal, Form, Input, Button, AutoComplete, Upload, message, DatePicker, Row, Col } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './share-match-experience-modal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
-import { Team, Venue } from '@/types/soccer.types';
 
 const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
@@ -42,9 +41,8 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
     const [selectedCountry, setSelectedCountry] = useState<string>('');
     const [selectedLeague, setSelectedLeague] = useState<number>();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-    const [teams, setTeams] = useState<{ team: Team; venue: Venue }[]>([]);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
+    const queryClient = useQueryClient();
 
     const {
         control,
@@ -74,7 +72,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         SoccerService.getVenues
     );
 
-    const { data: fetchedTeams = [] } = useQueryOnDefinedParam(
+    const { data: teams = [] } = useQueryOnDefinedParam(
         'teams',
         selectedLeague && selectedDate
             ? { leagueId: selectedLeague, season: calculateCurrentSeason(new Date(selectedDate)) }
@@ -82,9 +80,9 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         ({ leagueId, season }) => SoccerService.getTeams({ leagueId, season })
     );
 
-    useEffect(() => {
-        setTeams(fetchedTeams);
-    }, [fetchedTeams]);
+    const resetTeams = () => {
+        queryClient.setQueryData(['teams'], []); 
+    };
 
     const resetValuesOnCountryChange = (value: string) => {
         setSelectedCountry(value);
@@ -94,7 +92,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         setValue('homeTeam', '');
         setValue('awayTeam', '');
         setSelectedLeague(undefined);
-        setTeams([]);
+        resetTeams();
         trigger('country');
     };
 
@@ -103,7 +101,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         setValue('league', value);
         setValue('homeTeam', '');
         setValue('awayTeam', '');
-        setTeams([]);
+        resetTeams();
         trigger('league');
     };
 
@@ -118,7 +116,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
             setValue('matchDate', date);
             setValue('homeTeam', '');
             setValue('awayTeam', '');
-            setTeams([]);
+            resetTeams();
             trigger('matchDate');
         } else {
             trigger('matchDate');
@@ -151,7 +149,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
             setSelectedCountry('');
             setSelectedLeague(undefined);
             setSelectedDate(null);
-            setTeams([]);
+            resetTeams();
             onClose();
         } catch (error) {
             message.error('An error occurred while submitting the matchExperience.');
@@ -168,7 +166,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                 setSelectedCountry('');
                 setSelectedLeague(undefined);
                 setSelectedDate(null);
-                setTeams([]);
+                resetTeams();
                 onClose();
             }}
             footer={null}
