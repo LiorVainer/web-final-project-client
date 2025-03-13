@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { MatchExperienceService } from '@api/services/match-experience.service.ts';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
-import { Button, Modal } from 'antd';
+import { Button, message, Modal } from 'antd';
 
 interface DeleteMatchExperienceModalProps {
     matchExperienceId: string;
@@ -20,6 +20,7 @@ export const DeleteMatchExperienceModal = ({ matchExperienceId, onClose }: Delet
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE] });
             navigate('/');
+            message.success('Match Experience Deleted successfully');
             onClose();
         },
     });

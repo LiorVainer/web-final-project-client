@@ -133,8 +133,6 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
         trigger(key);
     };
 
-    console.log('imageUrl', imageUrl);
-
     const onSubmit = async (values: MatchExperienceFormValues) => {
         const isValid = await trigger();
         if (!isValid) return;
@@ -148,8 +146,6 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
                 const { data } = await FileService.handleUpload(formData);
                 uploadedImageUrl = data.url.split('public/')[1];
             }
-
-            console.log({ uploadedImageUrl });
 
             const { picture, ...valuesWithConvertedDate } = { ...values, matchDate: values.matchDate.toDate() };
 
