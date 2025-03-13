@@ -1,21 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { Form, Input, Button, Row, Col, Avatar, Upload, Typography, message } from 'antd';
 import { UploadOutlined, UserOutlined } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
+
 import { AuthService } from '@/api/services/auth.service';
 
 const { Text } = Typography;
+
+export interface RegestrationFormValues {
+    username: string;
+    email: string;
+    password: string;
+    picture: string;
+}
 
 export const RegestrationPage = () => {
     const [isSignUp, setIsSignUp] = useState(false);
     const [form] = Form.useForm();
     const [image, setImage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const mockUsers = [
-        { email: 'john@example.com', password: '123456' },
-        { email: 'jane@example.com', password: 'password123' },
-    ];
 
     const handleChange: UploadProps['onChange'] = ({ fileList }) => {
         if (fileList.length > 0) {
@@ -31,7 +35,7 @@ export const RegestrationPage = () => {
         }
     };
 
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: RegestrationFormValues) => {
         const user = {
             username: values.username,
             email: values.email,
