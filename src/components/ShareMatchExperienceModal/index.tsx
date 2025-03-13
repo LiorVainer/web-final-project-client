@@ -9,6 +9,8 @@ import styles from './share-match-experience-modal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
+import { AiService } from '@/api/services/ai.service';
+import { formatObject } from '@/utils/formatObject.utils';
 
 const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
@@ -51,10 +53,14 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         reset,
         getValues,
         trigger,
+        watch,
         formState: { errors },
     } = useForm<ShareMatchExperienceModalValues>({
         resolver: yupResolver(MatchExperienceSchema),
     });
+
+    const { matchDate, picture, ...rest } = watch();
+    const isAiButtonDisabled = Object.values(rest).some((value) => value === undefined || value === '');
 
     const calculateCurrentSeason = (date: Date): number => {
         return date.getMonth() >= 6 ? date.getFullYear() : date.getFullYear() - 1;
@@ -79,6 +85,29 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
             : undefined,
         ({ leagueId, season }) => SoccerService.getTeams({ leagueId, season })
     );
+
+    const fetchAIHelp = async () => {
+        try {
+            const formValues = getValues();
+            const { matchDate, ...rest } = formValues;
+            const formattedValues = formatObject(rest);
+
+            const prompt = `Generate a short, engaging match experience description based on these details. 
+                Capture the emotions, key moments, and atmosphere in a concise way. 
+                Only return the description itself—do not include introductions, explanations, or extra text. 
+                Match details: ${formattedValues}`;
+            const response = await AiService.generateText(prompt);
+
+            if (response) {
+                setValue('description', response);
+                message.success('AI-generated description added!');
+            } else {
+                message.error('Failed to generate description :(');
+            }
+        } catch (error) {
+            message.error('An error occurred while fetching AI help.');
+        }
+    };
 
     const resetTeams = () => {
         queryClient.setQueryData(['teams'], []);
@@ -280,12 +309,18 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                     label="Description"
                     validateStatus={errors.description ? 'error' : ''}
                     help={errors.description?.message}
+                    className={styles.formItem}
                 >
-                    <Controller
-                        name="description"
-                        control={control}
-                        render={({ field }) => <Input.TextArea {...field} />}
-                    />
+                    <div className={styles.descriptionContainer}>
+                        <Controller
+                            name="description"
+                            control={control}
+                            render={({ field }) => <Input.TextArea {...field} className={styles.textArea} />}
+                        />
+                        <Button className={styles.aiButton} onClick={fetchAIHelp} disabled={isAiButtonDisabled}>
+                            Ask AI for help
+                        </Button>
+                    </div>
                 </Form.Item>
 
                 <Form.Item
