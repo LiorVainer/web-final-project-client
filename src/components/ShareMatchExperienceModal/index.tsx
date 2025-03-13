@@ -48,7 +48,6 @@ const DEFAULT_INITIAL_VALUES: MatchExperienceFormValues = {
 
 type ShareMatchExperienceModalProps = {
     onClose: () => void;
-
     existingMatchExperience?: MatchExperience;
 };
 
@@ -147,12 +146,18 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
                 const formData = new FormData();
                 formData.append('file', selectedFile);
                 const { data } = await FileService.handleUpload(formData);
-                uploadedImageUrl = data.url.split('/public/')[1];
+                uploadedImageUrl = data.url.split('public/')[1];
             }
+
+            console.log({ uploadedImageUrl });
 
             const { picture, ...valuesWithConvertedDate } = { ...values, matchDate: values.matchDate.toDate() };
 
             if (existingMatchExperience) {
+                existingMatchExperience.picture &&
+                    uploadedImageUrl &&
+                    (await FileService.handleDelete(existingMatchExperience.picture));
+
                 await MatchExperienceService.updateMatchExperience(existingMatchExperience._id, {
                     ...valuesWithConvertedDate,
                     ...(uploadedImageUrl && { picture: uploadedImageUrl }),
