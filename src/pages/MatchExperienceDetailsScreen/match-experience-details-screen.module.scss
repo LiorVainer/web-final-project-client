@@ -6,17 +6,10 @@
     padding-block: 5rem;
 }
 
-
-
 .loadingContainer, .errorContainer {
     @extend .container;
     display: flex;
     gap: 1.5rem;
-}
-
-.loadingText {
-    font-size: 1.1rem;
-    color: #374151;
 }
 
 .errorIcon {

@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Screen } from '@components/Screen';
 import { LiveChatModal } from '@components/LiveChatModal';
-import { Alert, Spin } from 'antd';
+import { Alert } from 'antd';
 import moment from 'moment';
 import { MatchDetails } from '@components/MatchDetails';
 import { UserInfo } from '@components/UserInfo';
@@ -15,6 +15,7 @@ import { LiveChatsSection } from '@components/LiveChatsSection';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import { XCircle } from 'lucide-react';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
+import { LoadingContainer } from '@components/LoadingContainer';
 
 export interface MatchExperienceDetailsScreenProps {}
 
@@ -47,12 +48,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     };
 
     if (isLoading) {
-        return (
-            <Screen className={classes.loadingContainer}>
-                <Spin className={classes.spinner} size="large" />
-                <h4 className={classes.loadingText}>Fetching match experience...</h4>
-            </Screen>
-        );
+        return <LoadingContainer loadingText={'Fetching match experience...'} />;
     }
 
     if (error || !matchExperience) {

@@ -6,10 +6,10 @@ import { AuthProvider } from '@/context/AuthContext.tsx';
 
 export const GlobalContextProvider = ({ children }: PropsWithChildren<{}>) => {
     return (
-        <AuthProvider>
-            <AntdProvider>
-                <QueryClientProvider client={reactQueryClient}>{children}</QueryClientProvider>
-            </AntdProvider>
-        </AuthProvider>
+        <AntdProvider>
+            <QueryClientProvider client={reactQueryClient}>
+                <AuthProvider>{children}</AuthProvider>
+            </QueryClientProvider>
+        </AntdProvider>
     );
 };

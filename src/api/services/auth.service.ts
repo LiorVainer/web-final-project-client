@@ -69,7 +69,7 @@ export const AuthService = {
                 console.error('Not valid response for fetching user:', error);
             }
 
-            return user;
+            return user ?? null;
         } catch (error) {
             console.error('Error fetching user:', error);
             throw error;
