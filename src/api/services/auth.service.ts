@@ -1,4 +1,4 @@
-import { RegisterPayload, LoginPayload, UserSchema } from '../../models/user.model';
+import { AuthUserResponseSchema, LoginPayload, PublicUserSchema, RegisterPayload } from '@/models/user.model.ts';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/auth';
@@ -8,7 +8,7 @@ export const AuthService = {
         try {
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/register`, userData);
 
-            const { data: user, success, error } = UserSchema.safeParse(response.data);
+            const { data: user, success, error } = AuthUserResponseSchema.safeParse(response.data);
 
             if (!success) {
                 console.error('Not valid response for registration:', error);
@@ -24,7 +24,7 @@ export const AuthService = {
         try {
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/login`, userData);
 
-            const { data: user, success, error } = UserSchema.safeParse(response.data);
+            const { data: user, success, error } = PublicUserSchema.safeParse(response.data);
 
             if (!success) {
                 console.error('Not valid response for login:', error);

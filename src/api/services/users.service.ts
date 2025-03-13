@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CreateUserPayload, User, UserSchema } from '../../models/user.model';
+import { PublicUser, PublicUserSchema, RegisterPayload, User, UserSchema } from '@/models/user.model.ts';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/users';
@@ -7,15 +7,16 @@ export const ROUTE_PREFIX = '/users';
 export const UsersService = {
     async getUsers() {
         try {
-            const response = await axiosInstance.get<User[]>(ROUTE_PREFIX);
+            const response = await axiosInstance.get<PublicUser[]>(ROUTE_PREFIX);
 
-            const { data: users, success, error } = UserSchema.array().safeParse(response.data);
+            const parsedResponse = PublicUserSchema.array().safeParse(response.data);
 
-            if (!success) {
-                console.error('Not valid response for fetching users:', error);
+            if (!parsedResponse.success) {
+                console.error('Invalid response for fetching users:', parsedResponse.error);
+                return [];
             }
 
-            return users;
+            return parsedResponse.data;
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;
@@ -39,11 +40,11 @@ export const UsersService = {
         }
     },
 
-    async createUser(userData: CreateUserPayload) {
+    async createUser(userData: RegisterPayload) {
         try {
             const response = await axiosInstance.post(ROUTE_PREFIX, userData);
 
-            const { data: user, success, error } = UserSchema.safeParse(response.data);
+            const { data: user, success, error } = PublicUserSchema.safeParse(response.data);
 
             if (!success) {
                 console.error('Not valid response for creating user:', error);

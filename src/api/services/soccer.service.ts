@@ -16,7 +16,10 @@ export const SoccerService = {
 
     async getLeagues(country: string) {
         try {
-            const { data } = await axiosInstance.get<{ league: League; country: Country }[]>(`${ROUTE_PREFIX}/leagues`, { params: { country } });
+            const { data } = await axiosInstance.get<{ league: League; country: Country }[]>(
+                `${ROUTE_PREFIX}/leagues`,
+                { params: { country } }
+            );
             return data;
         } catch (error) {
             console.error('Error fetching leagues:', (error as any).message);
@@ -34,9 +37,11 @@ export const SoccerService = {
         }
     },
 
-    async getTeams(league: number) {
+    async getTeams({ leagueId, season }: { leagueId: number; season: number }) {
         try {
-            const { data } = await axiosInstance.get<{ team: Team; venue: Venue }[]>(`${ROUTE_PREFIX}/teams`, { params: { league } });
+            const { data } = await axiosInstance.get<{ team: Team; venue: Venue }[]>(`${ROUTE_PREFIX}/teams`, {
+                params: { league: leagueId, season },
+            });
             return data;
         } catch (error) {
             console.error('Error fetching teams:', (error as any).message);

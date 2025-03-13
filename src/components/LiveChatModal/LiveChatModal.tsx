@@ -1,44 +1,120 @@
 import classes from './live-chat-modal.module.scss';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Send, X } from 'lucide-react';
 import clsx from 'clsx';
-import { ChatMessage } from '@/models/chat.model.ts';
 import { Input } from 'antd';
+import { useChat } from '@hooks/useChat.hooks.ts';
+import moment from 'moment';
+import { ChatMessage } from '@/models/chat.model.ts';
 
 export interface LiveChatModalProps {
-    messages: ChatMessage[];
+    matchExperienceId: string;
+    visitorId: string;
+    creatorId: string;
+    loggedInUserId: string;
     onClose: () => void;
 }
 
-export const LiveChatModal = ({ messages, onClose }: LiveChatModalProps) => {
+export const LiveChatModal = ({
+    matchExperienceId,
+    visitorId,
+    creatorId,
+    loggedInUserId,
+    onClose,
+}: LiveChatModalProps) => {
     const [newMessage, setNewMessage] = useState('');
-    const handleSendMessage = (message: string) => {
-        console.log('Sending message:', message);
-        setNewMessage('');
+    const { messages, sendMessage, visitor, matchExperienceCreator, onlineUsers } = useChat({
+        matchExperienceId,
+        visitorId,
+        loggedInUserId,
+        matchExperienceCreatorId: creatorId,
+    });
+
+    const isOtherUserOnline = useMemo(
+        () => (loggedInUserId === visitorId ? onlineUsers[creatorId] : onlineUsers[visitorId]),
+        [onlineUsers, loggedInUserId, visitorId, creatorId]
+    );
+
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
+
+    const handleSendMessage = () => {
+        if (newMessage.trim()) {
+            sendMessage(newMessage);
+            setNewMessage('');
+        }
     };
+
+    const formatMessageDate = useCallback((date: Date | undefined) => {
+        const messageDate = moment(date);
+        const today = moment().startOf('day');
+        const yesterday = moment().subtract(1, 'days').startOf('day');
+
+        if (messageDate.isSame(today, 'day')) return 'Today';
+        if (messageDate.isSame(yesterday, 'day')) return 'Yesterday';
+        return messageDate.format('MMMM D, YYYY');
+    }, []);
+
+    const shouldShowDateSeparator = useCallback(
+        (index: number) => {
+            if (index === 0) return true;
+            const currentDate = formatMessageDate(messages?.at(index)?.createdAt);
+            const previousDate = formatMessageDate(messages?.at(index - 1)?.createdAt);
+            return currentDate !== previousDate;
+        },
+        [messages, formatMessageDate]
+    );
+
+    const renderMessage = useCallback(
+        (msg: ChatMessage, index: number) => {
+            const showDateSeparator = shouldShowDateSeparator(index);
+            return (
+                <div key={index}>
+                    {showDateSeparator && (
+                        <div className={classes.dateSeparator}>{formatMessageDate(msg.createdAt)}</div>
+                    )}
+                    <div
+                        className={clsx(classes.message, {
+                            [classes.ownMessage]: msg.senderId === loggedInUserId,
+                        })}
+                    >
+                        <p>{msg.content}</p>
+                        <span className={classes.timestamp}>{moment(msg.createdAt).format('hh:mm')}</span>
+                    </div>
+                </div>
+            );
+        },
+        [visitorId, shouldShowDateSeparator, formatMessageDate]
+    );
 
     return (
         <div className={classes.chatModal}>
             <div className={classes.chatHeader}>
-                <h3>Live Chat</h3>
+                <div className={classes.userInfo}>
+                    <img
+                        src={visitorId === loggedInUserId ? matchExperienceCreator?.picture : visitor?.picture}
+                        alt="User"
+                        className={classes.userAvatar}
+                    />
+                    <div className={classes.userDetails}>
+                        <h3>{visitorId === loggedInUserId ? matchExperienceCreator?.username : visitor?.username}</h3>
+                        {isOtherUserOnline ? <p className={classes.activeStatus}>Active now</p> : null}
+                    </div>
+                    {isOtherUserOnline && <span className={classes.onlineDot}></span>}
+                </div>
                 <button onClick={onClose}>
                     <X size={20} />
                 </button>
             </div>
 
             <div className={classes.chatMessages}>
-                {messages.map((msg) => (
-                    <div
-                        key={msg.createdAt.getMilliseconds()}
-                        className={clsx(classes.message, {
-                            [classes.ownMessage]: msg.senderId === 'You',
-                        })}
-                    >
-                        <strong>{msg.senderId}</strong>
-                        <p>{msg.content}</p>
-                        <span>{msg.senderId}</span>
-                    </div>
-                ))}
+                {messages?.map(renderMessage)}
+                <div ref={messagesEndRef} className={classes.scrollAnchor} />
             </div>
 
             <div className={classes.chatForm}>
@@ -48,8 +124,9 @@ export const LiveChatModal = ({ messages, onClose }: LiveChatModalProps) => {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type your message..."
                     className={classes.chatInput}
+                    onPressEnter={handleSendMessage}
                 />
-                <button onClick={() => handleSendMessage(newMessage)} className={classes.sendButton}>
+                <button onClick={handleSendMessage} className={classes.sendButton}>
                     <Send size={16} />
                 </button>
             </div>
