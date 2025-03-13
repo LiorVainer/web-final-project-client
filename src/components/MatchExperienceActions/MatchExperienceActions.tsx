@@ -7,6 +7,7 @@ import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import classes from './match-experience-actions.module.scss';
 import { ShareMatchExperienceModal } from '@components/ShareMatchExperienceModal';
 import { MatchExperience } from '@/models/match-experience.model.ts';
+import { DeleteMatchExperienceModal } from '@components/DeleteMatchExperienceModal';
 
 // TODO - remove prop drilling of likes and use auth context instead
 interface MatchExperienceActionsProps {
@@ -105,9 +106,15 @@ export const MatchExperienceActions = ({
                 </>
             )}
 
+            {deleteMatchExperienceModalOpen && (
+                <DeleteMatchExperienceModal
+                    onClose={() => setDeleteMatchExperienceModalOpen(false)}
+                    matchExperienceId={matchExperienceId}
+                />
+            )}
+
             {isEditMatchExperienceModalOpen && (
                 <ShareMatchExperienceModal
-                    isOpen={isEditMatchExperienceModalOpen}
                     onClose={() => {
                         setIsEditMatchExperienceModalOpen(false);
                     }}

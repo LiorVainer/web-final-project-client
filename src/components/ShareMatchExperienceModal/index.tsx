@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AutoComplete, Button, Col, DatePicker, Form, Input, message, Modal, Row, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import { Controller, useForm } from 'react-hook-form';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './share-match-experience-modal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
@@ -14,14 +14,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import { MatchExperience } from '@/models/match-experience.model.ts';
 import { calculateCurrentSeason } from '@/utils/date.utils.ts';
+import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 
-const MatchExperienceFormSchema = z.object({
+const MatchExperienceFormValuesSchema = z.object({
     title: z.string().min(3, 'Title is too short').nonempty('Title is required'),
     description: z.string().min(10, 'Description is too short').nonempty('Description is required'),
     picture: z.string().optional(),
     country: z.string().nonempty('Country is required'),
     stadium: z.string().nonempty('Stadium is required'),
     league: z.string().nonempty('League is required'),
+    leaugeId: z.number().optional(),
     homeTeam: z.string().nonempty('Home Team is required'),
     awayTeam: z.string().nonempty('Away Team is required'),
     matchDate: z.preprocess(
@@ -30,9 +32,9 @@ const MatchExperienceFormSchema = z.object({
     ),
 });
 
-type ShareMatchExperienceModalValues = z.infer<typeof MatchExperienceFormSchema>;
+type MatchExperienceFormValues = z.infer<typeof MatchExperienceFormValuesSchema>;
 
-const DEFAULT_INITIAL_VALUES: ShareMatchExperienceModalValues = {
+const DEFAULT_INITIAL_VALUES: MatchExperienceFormValues = {
     title: '',
     description: '',
     picture: '',
@@ -45,17 +47,12 @@ const DEFAULT_INITIAL_VALUES: ShareMatchExperienceModalValues = {
 };
 
 type ShareMatchExperienceModalProps = {
-    isOpen: boolean;
     onClose: () => void;
 
     existingMatchExperience?: MatchExperience;
 };
 
-export const ShareMatchExperienceModal = ({
-    isOpen,
-    onClose,
-    existingMatchExperience,
-}: ShareMatchExperienceModalProps) => {
+export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: ShareMatchExperienceModalProps) => {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedLeagueId, setSelectedLeagueId] = useState<number>();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -69,14 +66,17 @@ export const ShareMatchExperienceModal = ({
         reset,
         trigger,
         formState: { errors },
-    } = useForm<ShareMatchExperienceModalValues>({
-        resolver: zodResolver(MatchExperienceFormSchema),
+    } = useForm<MatchExperienceFormValues>({
+        resolver: zodResolver(MatchExperienceFormValuesSchema),
         defaultValues: existingMatchExperience
             ? { ...existingMatchExperience, matchDate: dayjs(existingMatchExperience.matchDate) }
             : { ...DEFAULT_INITIAL_VALUES },
     });
 
-    const { data: countries = [] } = useQueryOnDefinedParam('countries', isOpen, SoccerService.getCountries);
+    const { data: countries = [] } = useQuery({
+        queryKey: ['countries'],
+        queryFn: SoccerService.getCountries,
+    });
     const { data: leagues = [] } = useQueryOnDefinedParam(
         'leagues',
         getValues('country') ? getValues('country') : undefined,
@@ -95,6 +95,15 @@ export const ShareMatchExperienceModal = ({
             : undefined,
         ({ leagueId, season }) => SoccerService.getTeams({ leagueId, season })
     );
+
+    useEffect(() => {
+        if (existingMatchExperience && leagues && !selectedLeagueId) {
+            const leagueId = leagues.find((league) => league.league.name === existingMatchExperience?.league)?.league
+                .id;
+
+            setSelectedLeagueId(leagueId);
+        }
+    }, [leagues]);
 
     const resetTeams = () => {
         queryClient.setQueryData(['teams'], []);
@@ -120,12 +129,14 @@ export const ShareMatchExperienceModal = ({
         trigger('league');
     };
 
-    const resetValuesOnChange = (key: keyof ShareMatchExperienceModalValues, value: string) => {
+    const resetValuesOnChange = (key: keyof MatchExperienceFormValues, value: string) => {
         setValue(key, value);
         trigger(key);
     };
 
-    const onSubmit = async (values: ShareMatchExperienceModalValues) => {
+    console.log('imageUrl', imageUrl);
+
+    const onSubmit = async (values: MatchExperienceFormValues) => {
         const isValid = await trigger();
         if (!isValid) return;
 
@@ -139,29 +150,40 @@ export const ShareMatchExperienceModal = ({
                 uploadedImageUrl = data.url.split('/public/')[1];
             }
 
-            const valuesWithConvertedDate = { ...values, matchDate: values.matchDate.toDate() };
+            const { picture, ...valuesWithConvertedDate } = { ...values, matchDate: values.matchDate.toDate() };
 
-            await MatchExperienceService.createMatchExperience({
-                ...valuesWithConvertedDate,
-                picture: uploadedImageUrl,
-                createdBy: '123412341234123412341234',
-            });
+            if (existingMatchExperience) {
+                await MatchExperienceService.updateMatchExperience(existingMatchExperience._id, {
+                    ...valuesWithConvertedDate,
+                    ...(uploadedImageUrl && { picture: uploadedImageUrl }),
+                });
 
-            message.success('MatchExperience created successfully');
+                queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, existingMatchExperience._id] });
+
+                message.success('Match Experience updated successfully');
+            } else {
+                await MatchExperienceService.createMatchExperience({
+                    ...valuesWithConvertedDate,
+                    picture: uploadedImageUrl,
+                    createdBy: '123412341234123412341234',
+                });
+
+                message.success('Match Experience Shared successfully');
+            }
             reset();
             setImageUrl('');
             setSelectedLeagueId(undefined);
             resetTeams();
             onClose();
         } catch (error) {
-            message.error('An error occurred while submitting the matchExperience.');
+            message.error('An error occurred while submitting the match experience.');
         }
     };
 
     return (
         <Modal
             title="Share your match experience"
-            open={isOpen}
+            open
             onCancel={() => {
                 reset();
                 setImageUrl('');

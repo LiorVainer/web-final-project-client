@@ -54,7 +54,6 @@ export const HomeScreen = ({}: HomeScreenProps) => {
             </button>
             {isModalOpen && (
                 <ShareMatchExperienceModal
-                    isOpen={isModalOpen}
                     onClose={() => {
                         setIsModalOpen(false);
                         refetch();
