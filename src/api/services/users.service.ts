@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { User, UserSchema } from '../../models/user.model';
+import { CreateUserPayload, User, UserSchema } from '../../models/user.model';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/users';
@@ -39,7 +39,7 @@ export const UsersService = {
         }
     },
 
-    async createUser(userData: User) {
+    async createUser(userData: CreateUserPayload) {
         try {
             const response = await axiosInstance.post(ROUTE_PREFIX, userData);
 

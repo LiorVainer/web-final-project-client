@@ -4,6 +4,7 @@ import { HomeScreen } from '@pages/HomeScreen';
 import { Layout } from '@/layout/Layout';
 import { MatchExperiencesCatalogScreen } from '@pages/MatchExperiencesCatalogScreen';
 import { ROUTES } from '@/constants/routes.const';
+import { RegestrationPage } from '@/pages/RegestrationPage';
 
 export interface RouterProps {}
 
@@ -15,6 +16,7 @@ export const Router = (_props: RouterProps) => {
                     <Route index element={<MatchExperiencesCatalogScreen />}></Route>
                     <Route path=":id" element={<MatchExperienceDetailsScreen />}></Route>
                 </Route>
+                <Route path={ROUTES.REGISTRATION} element={<RegestrationPage />}></Route>
 
                 <Route path="/" element={<HomeScreen />} />
             </Route>
