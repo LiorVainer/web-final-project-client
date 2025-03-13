@@ -1,56 +1,72 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { Form, Input, Button, Row, Col, Avatar, Upload, Typography, message } from 'antd';
+import { Avatar, Button, Col, Form, Input, Row, Typography, Upload } from 'antd';
 import { UploadOutlined, UserOutlined } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
 
 import { AuthService } from '@/api/services/auth.service';
+import styles from '@components/ShareMatchExperienceModal/share-match-experience-modal.module.scss';
+import { FileService } from '@api/services/file.service.ts';
+import { AuthResponse, LoginPayload, RegisterPayload } from '@/models/user.model.ts';
+import { useAuth } from '@/context/AuthContext.tsx';
+import { AxiosError } from 'axios';
+import { useNavigate } from 'react-router';
 
 const { Text } = Typography;
 
-export interface RegestrationFormValues {
+export interface RegistrationFormValues {
     username: string;
     email: string;
     password: string;
     picture: string;
 }
 
-export const RegestrationPage = () => {
+export const AuthPage = () => {
     const [isSignUp, setIsSignUp] = useState(false);
     const [form] = Form.useForm();
-    const [image, setImage] = useState<string | null>(null);
+    const navigate = useNavigate();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [imageUrl, setImageUrl] = useState<string>('');
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const { handleAuthResponse } = useAuth();
 
-    const handleChange: UploadProps['onChange'] = ({ fileList }) => {
-        if (fileList.length > 0) {
-            const file = fileList[fileList.length - 1].originFileObj as File;
-            if (file) {
-                const newImageUrl = URL.createObjectURL(file);
-                if (image) {
-                    URL.revokeObjectURL(image);
+    const onFinish = async (values: RegistrationFormValues) => {
+        let uploadedImageUrl = imageUrl;
+        let response: AuthResponse | undefined;
+
+        try {
+            if (isSignUp) {
+                if (selectedFile) {
+                    const formData = new FormData();
+                    formData.append('file', selectedFile);
+                    const { data } = await FileService.handleUpload(formData);
+                    uploadedImageUrl = data.url.split('public/')[1];
                 }
-                setImage(newImageUrl);
-                form.setFieldsValue({ picture: newImageUrl });
+                console.log('uploadedImageUrl', uploadedImageUrl);
+                const user: RegisterPayload = {
+                    username: values.username,
+                    email: values.email,
+                    password: values.password,
+                    picture: uploadedImageUrl,
+                };
+
+                response = await AuthService.register(user);
+            } else {
+                const user: LoginPayload = {
+                    email: values.email,
+                    password: values.password,
+                };
+
+                response = await AuthService.login(user);
+            }
+        } catch (e: unknown) {
+            if (e instanceof AxiosError) {
+                setErrorMessage('Failed in authentication');
             }
         }
-    };
 
-    const onFinish = async (values: RegestrationFormValues) => {
-        const user = {
-            username: values.username,
-            email: values.email,
-            password: values.password,
-            picture: image || 'default-icon',
-        };
-
-        if (isSignUp) {
-            const newUser = await AuthService.register(user);
-        } else {
-            try {
-                await AuthService.login({ password: user.password, email: user.email });
-            } catch (error: any) {
-                setErrorMessage(error.response.data);
-            }
+        if (response) {
+            handleAuthResponse(response);
+            navigate('/');
         }
     };
 
@@ -95,20 +111,32 @@ export const RegestrationPage = () => {
                         <React.Fragment>
                             <Form.Item name="picture">
                                 <Avatar
-                                    src={image || undefined}
-                                    icon={!image ? <UserOutlined /> : undefined}
+                                    src={imageUrl || undefined}
+                                    icon={!imageUrl ? <UserOutlined /> : undefined}
                                     size={100}
                                 />
                             </Form.Item>
                             <Form.Item name="upload">
                                 <Upload
-                                    onChange={handleChange}
-                                    beforeUpload={() => false}
-                                    showUploadList={false}
-                                    accept="image/*"
+                                    maxCount={1}
+                                    beforeUpload={(file) => {
+                                        setSelectedFile(file);
+
+                                        const reader = new FileReader();
+                                        reader.onload = (e) => {
+                                            setImageUrl(e.target?.result as string);
+                                        };
+                                        reader.readAsDataURL(file);
+
+                                        return false;
+                                    }}
+                                    onRemove={() => {
+                                        setImageUrl('');
+                                        setSelectedFile(null);
+                                    }}
                                 >
-                                    <Button icon={<UploadOutlined />} type="dashed">
-                                        Upload Image
+                                    <Button className={styles.uploadButton} icon={<UploadOutlined />} block>
+                                        Upload Your Picture
                                     </Button>
                                 </Upload>
                             </Form.Item>
@@ -165,7 +193,6 @@ export const RegestrationPage = () => {
                         onClick={() => {
                             setIsSignUp(!isSignUp);
                             form.resetFields();
-                            setImage(null);
                             setErrorMessage(null);
                         }}
                         style={{ color: '#1890ff', cursor: 'pointer' }}
@@ -178,4 +205,4 @@ export const RegestrationPage = () => {
     );
 };
 
-export default RegestrationPage;
+export default AuthPage;

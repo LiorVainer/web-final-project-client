@@ -28,10 +28,19 @@ export const PublicUserSchema = UserWithIdSchema.omit({
     refreshTokens: true,
 });
 
-export const AuthUserResponseSchema = PublicUserSchema.extend({
+export const AuthResponseSchema = PublicUserSchema.extend({
     accessToken: z.string(),
     refreshToken: z.string(),
 });
+
+export const RefreshTokenResponseSchema = z.object({
+    accessToken: z.string(),
+    refreshToken: z.string(),
+});
+
+export type RefreshTokenResponse = z.infer<typeof RefreshTokenResponseSchema>;
+
+export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 
 export type PublicUser = z.infer<typeof PublicUserSchema>;
 

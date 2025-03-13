@@ -1,4 +1,4 @@
-import { AuthUserResponseSchema, LoginPayload, PublicUserSchema, RegisterPayload } from '@/models/user.model.ts';
+import { AuthResponseSchema, LoginPayload, RefreshTokenResponseSchema, RegisterPayload } from '@/models/user.model.ts';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/auth';
@@ -8,7 +8,7 @@ export const AuthService = {
         try {
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/register`, userData);
 
-            const { data: user, success, error } = AuthUserResponseSchema.safeParse(response.data);
+            const { data: user, success, error } = AuthResponseSchema.safeParse(response.data);
 
             if (!success) {
                 console.error('Not valid response for registration:', error);
@@ -24,7 +24,7 @@ export const AuthService = {
         try {
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/login`, userData);
 
-            const { data: user, success, error } = PublicUserSchema.safeParse(response.data);
+            const { data: user, success, error } = AuthResponseSchema.safeParse(response.data);
 
             if (!success) {
                 console.error('Not valid response for login:', error);
@@ -33,6 +33,23 @@ export const AuthService = {
             return user;
         } catch (error) {
             console.error('Error in login:', error);
+            throw error;
+        }
+    },
+
+    async refreshToken(refreshToken: string) {
+        try {
+            const response = await axiosInstance.post(`${ROUTE_PREFIX}/refresh`, { refreshToken });
+
+            const { data: tokens, success, error } = RefreshTokenResponseSchema.safeParse(response.data);
+
+            if (!success) {
+                console.error('Not valid response for token refresh:', error);
+            }
+
+            return tokens;
+        } catch (error) {
+            console.error('Error in token refresh:', error);
             throw error;
         }
     },

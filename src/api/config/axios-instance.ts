@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { AuthStorageService } from '@api/services/auth-storage.service.ts';
+import { AuthService } from '@api/services/auth.service.ts';
 
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -12,3 +14,49 @@ export const axiosInstance = axios.create({
         'Content-Type': 'application/json',
     },
 });
+
+axiosInstance.interceptors.request.use(async (config) => {
+    const token = AuthStorageService.getAccessToken();
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (error.response?.status === 401) {
+            console.log('Access token expired, attempting refresh...');
+
+            return await handleTokenRefresh(error);
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+const handleTokenRefresh = async (error) => {
+    try {
+        const refreshToken = AuthStorageService.getRefreshToken();
+        if (!refreshToken) {
+            AuthStorageService.clearTokens();
+            window.location.href = '/login'; // Redirect to login
+            return Promise.reject(error);
+        }
+
+        const newTokens = await AuthService.refreshToken(refreshToken);
+
+        if (!!newTokens) {
+            AuthStorageService.storeTokens(newTokens?.accessToken, newTokens?.refreshToken);
+            error.config.headers.Authorization = `Bearer ${newTokens?.accessToken}`;
+
+            return await axios(error.config);
+        }
+    } catch (refreshError) {
+        AuthStorageService.clearTokens();
+        window.location.href = '/login'; // Redirect to login
+
+        return Promise.reject(refreshError);
+    }
+};

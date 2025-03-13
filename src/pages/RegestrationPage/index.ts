@@ -1,3 +1,3 @@
-import RegestrationPage from './RegistrationPage';
+import AuthPage from './AuthPage.tsx';
 
-export { RegestrationPage };
+export { AuthPage };
