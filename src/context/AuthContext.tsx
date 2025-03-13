@@ -1,9 +1,11 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { AuthStorageService } from '@api/services/auth-storage.service.ts';
-import { AuthResponse, PublicUser } from '@/models/user.model.ts'; // For event-based logout handling
+import { AuthResponse, PublicUser } from '@/models/user.model.ts';
+import { AuthService } from '@api/services/auth.service.ts';
+import { ROUTES } from '@/constants/routes.const.ts'; // For event-based logout handling
 
 interface AuthContextType {
-    user: PublicUser | null;
+    loggedInUser: PublicUser | null;
     handleAuthResponse: (authResponse: AuthResponse) => void;
     logout: () => void;
 }
@@ -11,21 +13,38 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<PublicUser | null>(null);
+    const [loggedInUser, setLoggedInUser] = useState<PublicUser | null>(null);
+
+    const getLoggedInUser = async () => {
+        try {
+            const accessToken = AuthStorageService.getAccessToken();
+            if (!accessToken) return;
+
+            const user = await AuthService.me();
+            user && setLoggedInUser(user);
+        } catch (error) {
+            console.error('Error in fetching user:', error);
+        }
+    };
+    console.log('LoggedInUser:', loggedInUser);
+
+    useEffect(() => {
+        void getLoggedInUser();
+    }, []);
 
     const logout = () => {
         AuthStorageService.clearTokens(); // Remove tokens from storage
-        setUser(null); // Clear user context
-        window.location.href = '/login'; // Redirect to login page
+        setLoggedInUser(null); // Clear user context
+        window.location.href = ROUTES.AUTH;
     };
 
     const handleAuthResponse = (authResponse: AuthResponse) => {
         AuthStorageService.storeTokens(authResponse.accessToken, authResponse.refreshToken);
         const { refreshToken, accessToken, ...publicUser } = authResponse;
-        setUser(publicUser);
+        setLoggedInUser(publicUser);
     };
 
-    return <AuthContext.Provider value={{ user, handleAuthResponse, logout }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ loggedInUser, handleAuthResponse, logout }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

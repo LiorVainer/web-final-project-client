@@ -1,4 +1,10 @@
-import { AuthResponseSchema, LoginPayload, RefreshTokenResponseSchema, RegisterPayload } from '@/models/user.model.ts';
+import {
+    AuthResponseSchema,
+    LoginPayload,
+    PublicUserSchema,
+    RefreshTokenResponseSchema,
+    RegisterPayload,
+} from '@/models/user.model.ts';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/auth';
@@ -50,6 +56,22 @@ export const AuthService = {
             return tokens;
         } catch (error) {
             console.error('Error in token refresh:', error);
+            throw error;
+        }
+    },
+    async me() {
+        try {
+            const response = await axiosInstance.get(`${ROUTE_PREFIX}/me`);
+
+            const { data: user, success, error } = PublicUserSchema.safeParse(response.data);
+
+            if (!success) {
+                console.error('Not valid response for fetching user:', error);
+            }
+
+            return user;
+        } catch (error) {
+            console.error('Error fetching user:', error);
             throw error;
         }
     },

@@ -1,6 +1,7 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { AuthStorageService } from '@api/services/auth-storage.service.ts';
 import { AuthService } from '@api/services/auth.service.ts';
+import { ROUTES } from '@/constants/routes.const.ts';
 
 export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -36,12 +37,12 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-const handleTokenRefresh = async (error) => {
+const handleTokenRefresh = async (error: AxiosError) => {
     try {
         const refreshToken = AuthStorageService.getRefreshToken();
         if (!refreshToken) {
             AuthStorageService.clearTokens();
-            window.location.href = '/login'; // Redirect to login
+            window.location.href = ROUTES.AUTH;
             return Promise.reject(error);
         }
 
@@ -49,13 +50,15 @@ const handleTokenRefresh = async (error) => {
 
         if (!!newTokens) {
             AuthStorageService.storeTokens(newTokens?.accessToken, newTokens?.refreshToken);
-            error.config.headers.Authorization = `Bearer ${newTokens?.accessToken}`;
+            if (error.config) {
+                error.config.headers.Authorization = `Bearer ${newTokens?.accessToken}`;
 
-            return await axios(error.config);
+                return await axios(error.config);
+            }
         }
     } catch (refreshError) {
         AuthStorageService.clearTokens();
-        window.location.href = '/login'; // Redirect to login
+        window.location.href = ROUTES.AUTH;
 
         return Promise.reject(refreshError);
     }
