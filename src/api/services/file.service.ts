@@ -15,4 +15,13 @@ export const FileService = {
             throw error;
         }
     },
+
+    async handleDelete(fileUrl: string) {
+        try {
+            return axiosInstance.delete(`${ROUTE_PREFIX}/${fileUrl}`);
+        } catch (error) {
+            console.error('Error deleting file:', (error as any).message);
+            throw error;
+        }
+    },
 } satisfies Record<string, (...args: any[]) => Promise<any>>;
