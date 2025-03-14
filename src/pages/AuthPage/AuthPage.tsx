@@ -5,7 +5,7 @@ import { Avatar, Button, Form, Input, Typography, Upload } from 'antd';
 import { UploadOutlined, UserOutlined } from '@ant-design/icons';
 
 import { AuthService } from '@/api/services/auth.service';
-import styles from './auth-page.module.scss'; // Import SCSS module
+import styles from './auth-page.module.scss';
 import { FileService } from '@api/services/file.service.ts';
 import { AuthResponse, LoginPayload, RegisterPayload } from '@/models/user.model.ts';
 import { useAuth } from '@/context/AuthContext.tsx';
@@ -15,16 +15,9 @@ import { Screen } from '@components/Screen';
 import { AuthFormValidationRules } from '@pages/AuthPage/auth.validation.ts';
 import clsx from 'clsx';
 import { AuthStorageService } from '@api/services/auth-storage.service.ts';
+import { AuthFormAnimationVariants } from '@pages/AuthPage/auth.animations.ts';
 
 const { Text } = Typography;
-
-const formVariants = {
-    hiddenRight: { opacity: 0, x: 50 },
-    hiddenLeft: { opacity: 0, x: -50 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
-    exitRight: { opacity: 0, x: -50, transition: { duration: 0.5 } },
-    exitLeft: { opacity: 0, x: 50, transition: { duration: 0.5 } },
-};
 
 export interface RegistrationFormValues {
     username: string;
@@ -52,7 +45,6 @@ export const AuthPage = () => {
 
             const loginResponse = await AuthService.googleLogin(credential);
 
-            console.log({ loginResponse });
             if (!loginResponse) {
                 throw new Error('No response received');
             }
@@ -77,7 +69,6 @@ export const AuthPage = () => {
                     const { data } = await FileService.handleUpload(formData);
                     uploadedImageUrl = data.url.split('public/')[1];
                 }
-                console.log('uploadedImageUrl', uploadedImageUrl);
                 const user: RegisterPayload = {
                     username: values.username,
                     email: values.email,
@@ -121,7 +112,7 @@ export const AuthPage = () => {
                     initial={direction === 'right' ? 'hiddenRight' : 'hiddenLeft'}
                     animate="visible"
                     exit={direction === 'right' ? 'exitRight' : 'exitLeft'}
-                    variants={formVariants}
+                    variants={AuthFormAnimationVariants}
                     className={styles.authForm}
                 >
                     <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -143,8 +134,6 @@ export const AuthPage = () => {
                                         maxCount={1}
                                         beforeUpload={(file) => {
                                             setSelectedFile(file);
-
-                                            console.log('file', file);
 
                                             const reader = new FileReader();
                                             reader.onload = (e) => {
@@ -209,7 +198,7 @@ export const AuthPage = () => {
                             {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                             <Text
                                 onClick={() => {
-                                    setDirection(isSignUp ? 'left' : 'right'); // Reverse animation
+                                    setDirection(isSignUp ? 'left' : 'right');
                                     setIsSignUp(!isSignUp);
                                     form.resetFields();
                                     setErrorMessage(null);

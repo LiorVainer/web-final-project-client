@@ -69,7 +69,6 @@ export const AuthService = {
     },
     async googleLogin(credential: string) {
         try {
-            console.log('credential', credential);
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/google`, { credential });
 
             const { data, success, error } = AuthResponseSchema.safeParse(response.data);

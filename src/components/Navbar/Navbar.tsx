@@ -1,6 +1,6 @@
 import classes from './navbar.module.scss';
 import { Link } from 'react-router';
-import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 import { useAuth } from '@/context/AuthContext.tsx';
 
 export interface NavbarProps {}
@@ -26,7 +26,7 @@ export const Navbar = () => {
                 {loggedInUser && (
                     <Link to={'/'} className={classes.userProfile}>
                         <img
-                            src={getPictureFullUrl(loggedInUser.picture)}
+                            src={getPictureSrcUrl(loggedInUser.picture)}
                             alt="User Avatar"
                             className={classes.avatar}
                         />
