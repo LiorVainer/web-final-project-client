@@ -12,7 +12,7 @@ import { UserInfo } from '@components/UserInfo';
 import { CommentsSection } from '@components/CommentsSection';
 import { MatchExperienceActions } from '@components/MatchExperienceActions';
 import { LiveChatsSection } from '@components/LiveChatsSection';
-import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 import { XCircle } from 'lucide-react';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import { LoadingContainer } from '@components/LoadingContainer';
@@ -71,7 +71,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                 <div className={classes.content}>
                     {matchExperience.picture && (
                         <img
-                            src={getPictureFullUrl(matchExperience.picture)}
+                            src={getPictureSrcUrl(matchExperience.picture)}
                             alt={matchExperience.title}
                             className={classes.image}
                         />

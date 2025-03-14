@@ -14,8 +14,6 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-export const LOGGED_IN_USER_CACHE_TIME = 1000 * 60 * 5; // 5 minutes
-
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const queryClient = useQueryClient();
     const { data: loggedInUser, isLoading } = useQuery<PublicUser | null>({
@@ -25,9 +23,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!accessToken) return null;
             return await AuthService.me();
         },
-        staleTime: LOGGED_IN_USER_CACHE_TIME,
         retry: 1,
     });
+
+    console.log(loggedInUser);
 
     const logoutMutation = useMutation({
         mutationFn: async () => {

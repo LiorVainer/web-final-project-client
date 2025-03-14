@@ -12,10 +12,8 @@ export interface RouterProps {}
 export const Router = (_props: RouterProps) => {
     return (
         <Routes>
-            {/* Public Routes */}
             <Route path={ROUTES.AUTH} element={<AuthPage />} />
 
-            {/* Protected Routes Grouped Under One Parent */}
             <Route path="/" element={<Layout />}>
                 <Route element={<ProtectedRoutes />}>
                     <Route path={ROUTES.MATCH_EXPERIENCE}>
