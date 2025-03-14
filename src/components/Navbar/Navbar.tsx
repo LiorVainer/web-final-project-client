@@ -1,5 +1,6 @@
 import classes from './navbar.module.scss';
 import { Link } from 'react-router';
+import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 
 export interface NavbarProps {}
 
@@ -21,7 +22,7 @@ export const Navbar = () => {
                 {/*</div>*/}
 
                 <Link to={'/'} className={classes.userProfile}>
-                    <img src="https://picsum.photos/40/40" alt="User Avatar" className={classes.avatar} />
+                    <img src={getPictureFullUrl()} alt="User Avatar" className={classes.avatar} />
                 </Link>
             </div>
         </nav>

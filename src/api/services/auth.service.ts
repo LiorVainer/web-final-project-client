@@ -59,12 +59,28 @@ export const AuthService = {
             throw error;
         }
     },
-
     async logout(refreshToken: string) {
         try {
             await axiosInstance.post(`${ROUTE_PREFIX}/logout`, { refreshToken });
         } catch (error) {
             console.error('Error in logout:', error);
+            throw error;
+        }
+    },
+    async googleLogin(credential: string) {
+        try {
+            console.log('credential', credential);
+            const response = await axiosInstance.post(`${ROUTE_PREFIX}/google`, { credential });
+
+            const { data, success, error } = AuthResponseSchema.safeParse(response.data);
+
+            if (!success) {
+                console.error('Not valid response for google login:', error);
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error in google login:', error);
             throw error;
         }
     },

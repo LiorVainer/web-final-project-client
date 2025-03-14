@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 
 import { Avatar, Button, Col, Form, Input, Row, Typography, Upload } from 'antd';
 import { UploadOutlined, UserOutlined } from '@ant-design/icons';
@@ -10,6 +11,7 @@ import { AuthResponse, LoginPayload, RegisterPayload } from '@/models/user.model
 import { useAuth } from '@/context/AuthContext.tsx';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router';
+import { AuthStorageService } from '@api/services/auth-storage.service.ts';
 
 const { Text } = Typography;
 
@@ -28,6 +30,26 @@ export const AuthPage = () => {
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const { handleAuthResponse } = useAuth();
+
+    const handleGoogleLoginSuccess = async (response: CredentialResponse) => {
+        try {
+            const { credential } = response;
+            if (!credential) {
+                throw new Error('No credential received');
+            }
+
+            const loginResponse = await AuthService.googleLogin(credential);
+
+            if (!loginResponse) {
+                throw new Error('No response received');
+            }
+            AuthStorageService.storeTokens(loginResponse.accessToken, loginResponse.refreshToken);
+            navigate('/');
+        } catch (error) {
+            console.error('Google login error', error);
+            setErrorMessage('Google Login failed');
+        }
+    };
 
     const onFinish = async (values: RegistrationFormValues) => {
         let uploadedImageUrl = imageUrl;
@@ -201,6 +223,11 @@ export const AuthPage = () => {
                         {isSignUp ? 'Sign in' : 'Sign up'}
                     </Text>
                 </Text>
+                <GoogleLogin
+                    locale={'en'}
+                    onSuccess={handleGoogleLoginSuccess}
+                    onError={() => setErrorMessage('Google Login failed')}
+                />
             </Col>
         </Row>
     );
