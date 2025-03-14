@@ -1,10 +1,12 @@
 import classes from './navbar.module.scss';
 import { Link } from 'react-router';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { useAuth } from '@/context/AuthContext.tsx';
 
 export interface NavbarProps {}
 
 export const Navbar = () => {
+    const { loggedInUser } = useAuth();
     return (
         <nav className={classes.navbar}>
             {/* Left Section: Brand */}
@@ -21,9 +23,15 @@ export const Navbar = () => {
                 {/*    <Link to="/settings">Settings</Link>*/}
                 {/*</div>*/}
 
-                <Link to={'/'} className={classes.userProfile}>
-                    <img src={getPictureFullUrl()} alt="User Avatar" className={classes.avatar} />
-                </Link>
+                {loggedInUser && (
+                    <Link to={'/'} className={classes.userProfile}>
+                        <img
+                            src={getPictureFullUrl(loggedInUser.picture)}
+                            alt="User Avatar"
+                            className={classes.avatar}
+                        />
+                    </Link>
+                )}
             </div>
         </nav>
     );

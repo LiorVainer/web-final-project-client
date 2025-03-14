@@ -1,19 +1,30 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
-
-import { Avatar, Button, Col, Form, Input, Row, Typography, Upload } from 'antd';
+import { motion } from 'framer-motion';
+import { Avatar, Button, Form, Input, Typography, Upload } from 'antd';
 import { UploadOutlined, UserOutlined } from '@ant-design/icons';
 
 import { AuthService } from '@/api/services/auth.service';
-import styles from '@components/ShareMatchExperienceModal/share-match-experience-modal.module.scss';
+import styles from './auth-page.module.scss'; // Import SCSS module
 import { FileService } from '@api/services/file.service.ts';
 import { AuthResponse, LoginPayload, RegisterPayload } from '@/models/user.model.ts';
 import { useAuth } from '@/context/AuthContext.tsx';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router';
+import { Screen } from '@components/Screen';
+import { AuthFormValidationRules } from '@pages/AuthPage/auth.validation.ts';
+import clsx from 'clsx';
 import { AuthStorageService } from '@api/services/auth-storage.service.ts';
 
 const { Text } = Typography;
+
+const formVariants = {
+    hiddenRight: { opacity: 0, x: 50 },
+    hiddenLeft: { opacity: 0, x: -50 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+    exitRight: { opacity: 0, x: -50, transition: { duration: 0.5 } },
+    exitLeft: { opacity: 0, x: 50, transition: { duration: 0.5 } },
+};
 
 export interface RegistrationFormValues {
     username: string;
@@ -26,6 +37,7 @@ export const AuthPage = () => {
     const [isSignUp, setIsSignUp] = useState(false);
     const [form] = Form.useForm();
     const navigate = useNavigate();
+    const [direction, setDirection] = useState<'left' | 'right'>('right');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -40,9 +52,11 @@ export const AuthPage = () => {
 
             const loginResponse = await AuthService.googleLogin(credential);
 
+            console.log({ loginResponse });
             if (!loginResponse) {
                 throw new Error('No response received');
             }
+
             AuthStorageService.storeTokens(loginResponse.accessToken, loginResponse.refreshToken);
             navigate('/');
         } catch (error) {
@@ -93,143 +107,130 @@ export const AuthPage = () => {
     };
 
     return (
-        <Row
-            justify="center"
-            align="middle"
-            style={{
-                minHeight: '100vh',
-                display: 'flex',
-            }}
-        >
-            <Col
-                span={8}
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                    gap: '15px',
-                    padding: '20px',
-                    backgroundColor: '#fff',
-                    borderRadius: '10px',
-                    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-                }}
+        <Screen className={styles.screen}>
+            <motion.div
+                className={styles.authBox}
+                layout
+                transition={{ type: 'spring', stiffness: 120, damping: 20, duration: 0.3 }}
             >
-                <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
-
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={onFinish}
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        width: '100%',
-                        gap: '10px',
-                        alignItems: 'center',
-                    }}
+                <div className={styles.header}>
+                    <h3>{isSignUp ? 'Sign Up' : 'Sign In'}</h3>
+                </div>
+                <motion.div
+                    key={isSignUp ? 'signUp' : 'signIn'}
+                    initial={direction === 'right' ? 'hiddenRight' : 'hiddenLeft'}
+                    animate="visible"
+                    exit={direction === 'right' ? 'exitRight' : 'exitLeft'}
+                    variants={formVariants}
+                    className={styles.authForm}
                 >
-                    {isSignUp && (
-                        <React.Fragment>
-                            <Form.Item name="picture">
-                                <Avatar
-                                    src={imageUrl || undefined}
-                                    icon={!imageUrl ? <UserOutlined /> : undefined}
-                                    size={100}
-                                />
-                            </Form.Item>
-                            <Form.Item name="upload">
-                                <Upload
-                                    maxCount={1}
-                                    showUploadList={false}
-                                    beforeUpload={(file) => {
-                                        setSelectedFile(file);
-
-                                        const reader = new FileReader();
-                                        reader.onload = (e) => {
-                                            setImageUrl(e.target?.result as string);
-                                        };
-                                        reader.readAsDataURL(file);
-
-                                        return false;
-                                    }}
-                                    onRemove={() => {
-                                        setImageUrl('');
-                                        setSelectedFile(null);
-                                    }}
+                    <Form form={form} layout="vertical" onFinish={onFinish}>
+                        {isSignUp && (
+                            <>
+                                <Form.Item name="picture">
+                                    <Avatar
+                                        src={imageUrl || undefined}
+                                        icon={!imageUrl ? <UserOutlined /> : undefined}
+                                        size={100}
+                                    />
+                                </Form.Item>
+                                <Form.Item
+                                    name="upload"
+                                    className={styles.uploadFormItem}
+                                    rules={AuthFormValidationRules.picture}
                                 >
-                                    <Button className={styles.uploadButton} icon={<UploadOutlined />} block>
-                                        Upload Your Picture
-                                    </Button>
-                                </Upload>
-                            </Form.Item>
-                            <Form.Item
-                                style={{
-                                    width: '20rem',
+                                    <Upload
+                                        maxCount={1}
+                                        beforeUpload={(file) => {
+                                            setSelectedFile(file);
+
+                                            console.log('file', file);
+
+                                            const reader = new FileReader();
+                                            reader.onload = (e) => {
+                                                setImageUrl(e.target?.result as string);
+                                            };
+                                            reader.readAsDataURL(file);
+
+                                            return false;
+                                        }}
+                                        onRemove={() => {
+                                            setImageUrl('');
+                                            setSelectedFile(null);
+                                        }}
+                                        showUploadList={false}
+                                    >
+                                        <Button className={styles.uploadButton} icon={<UploadOutlined />} block>
+                                            Upload Your Picture
+                                        </Button>
+                                    </Upload>
+                                </Form.Item>
+                                <Form.Item
+                                    label="Username"
+                                    name="username"
+                                    className={styles.inputField}
+                                    rules={AuthFormValidationRules.username}
+                                >
+                                    <Input placeholder="Enter your username" />
+                                </Form.Item>
+                            </>
+                        )}
+
+                        <Form.Item
+                            label="Email"
+                            name="email"
+                            className={styles.inputField}
+                            rules={AuthFormValidationRules.email}
+                        >
+                            <Input placeholder="Enter your email" />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Password"
+                            name="password"
+                            className={clsx(styles.password, styles.inputField)}
+                            rules={AuthFormValidationRules.password}
+                        >
+                            <Input.Password placeholder="Enter your password" />
+                        </Form.Item>
+
+                        {errorMessage && (
+                            <Text type="danger" className={styles.errorText}>
+                                {errorMessage}
+                            </Text>
+                        )}
+
+                        <Form.Item>
+                            <Button type="primary" htmlType="submit" className={styles.submitButton} block>
+                                {isSignUp ? 'Register' : 'Sign In'}
+                            </Button>
+                        </Form.Item>
+                        <Text>
+                            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+                            <Text
+                                onClick={() => {
+                                    setDirection(isSignUp ? 'left' : 'right'); // Reverse animation
+                                    setIsSignUp(!isSignUp);
+                                    form.resetFields();
+                                    setErrorMessage(null);
                                 }}
-                                label="Username"
-                                name="username"
-                                rules={[{ required: true, message: 'Please enter your username!' }]}
+                                className={styles.switchText}
                             >
-                                <Input placeholder="Enter your username" />
-                            </Form.Item>
-                        </React.Fragment>
-                    )}
-
-                    <Form.Item
-                        label="Email"
-                        name="email"
-                        style={{
-                            width: '20rem',
-                        }}
-                        rules={[{ required: true, message: 'Please enter your email!' }]}
-                    >
-                        <Input placeholder="Enter your email" />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Password"
-                        name="password"
-                        style={{
-                            width: '20rem',
-                        }}
-                        rules={[{ required: true, message: 'Please enter your password!' }]}
-                    >
-                        <Input.Password placeholder="Enter your password" />
-                    </Form.Item>
-                    {errorMessage && (
-                        <Text type="danger" style={{ marginBottom: '10px' }}>
-                            {errorMessage}
+                                {isSignUp ? 'Sign in' : 'Sign up'}
+                            </Text>
                         </Text>
-                    )}
-
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" style={{ width: '10rem' }} block>
-                            {isSignUp ? 'Register' : 'Sign In'}
-                        </Button>
-                    </Form.Item>
-                </Form>
-
-                <Text>
-                    {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-                    <Text
-                        onClick={() => {
-                            setIsSignUp(!isSignUp);
-                            form.resetFields();
-                            setErrorMessage(null);
-                        }}
-                        style={{ color: '#1890ff', cursor: 'pointer' }}
-                    >
-                        {isSignUp ? 'Sign in' : 'Sign up'}
-                    </Text>
-                </Text>
+                    </Form>
+                </motion.div>
+                <div className={styles.separator}>
+                    <span className={styles.separatorText}>or</span>
+                </div>
                 <GoogleLogin
                     locale={'en'}
                     onSuccess={handleGoogleLoginSuccess}
                     onError={() => setErrorMessage('Google Login failed')}
                 />
-            </Col>
-        </Row>
+            </motion.div>
+        </Screen>
     );
 };
 
