@@ -6,6 +6,7 @@ import {
     MatchExperience,
     MatchExperiencePayloadSchema,
     MatchExperienceSchema,
+    PaginatedMatchExperiencesSchema,
 } from '@/models/match-experience.model';
 import { ROUTES } from '@/constants/routes.const';
 import { OkResponseSchema } from '@/models/response.model.ts';
@@ -13,21 +14,18 @@ import { OkResponseSchema } from '@/models/response.model.ts';
 export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCE;
 
 export const MatchExperienceService = {
-    async getAllMatchExperience() {
+    async getAllMatchExperience(page = 1, limit = 5) {
         try {
-            const response = await axiosInstance.get<User[]>(ROUTE_PREFIX);
+            const response = await axiosInstance.get(ROUTE_PREFIX, {
+                params: { page, limit },
+            });
 
-            const {
-                data: matchExperiences,
-                success,
-                error,
-            } = MatchExperiencePayloadSchema.array().safeParse(response.data);
-
+            const { data, success, error } = PaginatedMatchExperiencesSchema.safeParse(response.data);
             if (!success) {
-                console.error('Not valid response for fetching matchExperience:', error);
+                console.error('Invalid response format for paginated match experiences:', error);
             }
 
-            return matchExperiences;
+            return data;
         } catch (error) {
             console.error('Error fetching matchExperience:', error);
             throw error;

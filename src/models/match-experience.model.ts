@@ -28,7 +28,14 @@ export const CreateMatchExperienceSchema = MatchExperiencePayloadSchema.omit({ _
     createdBy: z.string(),
 });
 
+export const PaginatedMatchExperiencesSchema = z.object({
+    experiences: z.array(MatchExperiencePayloadSchema), // Array of match experiences
+    totalPages: z.number(), // Total number of pages in pagination
+});
+
 export type Comment = z.infer<typeof CommentSchema>;
 export type MatchExperience = z.infer<typeof MatchExperienceSchema>;
 
 export type CreateMatchExperienceBody = z.infer<typeof CreateMatchExperienceSchema>;
+export type PaginatedMatchExperiences = z.infer<typeof PaginatedMatchExperiencesSchema>;
+

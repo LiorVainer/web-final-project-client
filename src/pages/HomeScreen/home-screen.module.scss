@@ -1,5 +1,11 @@
 @use '../../theme/theme' as theme;
 
+.container {
+    padding-inline: 20rem;
+    gap: 2rem;
+    padding-block: 5rem;
+}
+
 .button {
     @include theme.trans-button();
 }
@@ -45,4 +51,20 @@
     font-size: 16px;
     color: white;
     border: 2px solid white;
+}
+
+.matchCard {
+    border-radius: 20px;
+    padding: 20px;
+    background-color: white;
+    width: 500px;
+    margin-bottom: 15px;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    border: 2px solid white;
+}
+
+.matchList {
+
 }

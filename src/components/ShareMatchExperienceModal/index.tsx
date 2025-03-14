@@ -134,7 +134,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                 const formData = new FormData();
                 formData.append('file', selectedFile);
                 const { data } = await FileService.handleUpload(formData);
-                uploadedImageUrl = data.url.split('/public/')[1];
+                uploadedImageUrl = data.url.split('public/')[1];
             }
 
             await MatchExperienceService.createMatchExperience({
