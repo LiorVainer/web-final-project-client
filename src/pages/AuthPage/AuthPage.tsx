@@ -119,6 +119,7 @@ export const AuthPage = () => {
                             <Form.Item name="upload">
                                 <Upload
                                     maxCount={1}
+                                    showUploadList={false}
                                     beforeUpload={(file) => {
                                         setSelectedFile(file);
 

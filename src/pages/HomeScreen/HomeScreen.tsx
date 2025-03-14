@@ -7,10 +7,12 @@ import { UsersService } from '@api/services/users.service.ts';
 import { Button } from 'antd';
 import { useState } from 'react';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
+import { useAuth } from '../../context/AuthContext';
 
 export interface HomeScreenProps {}
 
 export const HomeScreen = ({}: HomeScreenProps) => {
+    const { logout } = useAuth();
     const { data, error, isPending } = useQueryService({ service: UsersService, method: 'getUsers' });
     const {
         data: matchExperiences,
@@ -45,7 +47,9 @@ export const HomeScreen = ({}: HomeScreenProps) => {
             ) : (
                 <div>No matchExperiences found.</div>
             )}
-            <button className={classes.button}>Press Me</button>
+            <button onClick={logout} className={classes.button}>
+                logout
+            </button>
             <button className={classes.floatingButton} onClick={() => setIsModalOpen(true)}>
                 <FaFutbol className={classes.icon} />
                 <div className={classes.plusIcon}>

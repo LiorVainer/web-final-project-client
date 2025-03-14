@@ -4,7 +4,7 @@ import { HomeScreen } from '@pages/HomeScreen';
 import { Layout } from '@/layout/Layout';
 import { MatchExperiencesCatalogScreen } from '@pages/MatchExperiencesCatalogScreen';
 import { ROUTES } from '@/constants/routes.const';
-import { AuthPage } from '@/pages/RegestrationPage';
+import { AuthPage } from '@/pages/AuthPage';
 import { ProtectedRoutes } from '@/layout/Router/ProtectedRoutes.tsx';
 
 export interface RouterProps {}

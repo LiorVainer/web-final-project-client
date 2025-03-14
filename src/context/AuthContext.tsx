@@ -2,8 +2,8 @@ import { createContext, useContext } from 'react';
 import { AuthStorageService } from '@api/services/auth-storage.service.ts';
 import { AuthResponse, PublicUser } from '@/models/user.model.ts';
 import { AuthService } from '@api/services/auth.service.ts';
-import { ROUTES } from '@/constants/routes.const.ts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { QUERY_KEYS } from '../api/constants/query-keys.const';
 
 interface AuthContextType {
     loggedInUser: PublicUser | null | undefined;
@@ -19,7 +19,7 @@ export const LOGGED_IN_USER_CACHE_TIME = 1000 * 60 * 5; // 5 minutes
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const queryClient = useQueryClient();
     const { data: loggedInUser, isLoading } = useQuery<PublicUser | null>({
-        queryKey: ['loggedInUser'],
+        queryKey: [QUERY_KEYS.LOGGED_IN_USER],
         queryFn: async () => {
             const accessToken = AuthStorageService.getAccessToken();
             if (!accessToken) return null;
@@ -31,18 +31,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logoutMutation = useMutation({
         mutationFn: async () => {
+            const refreshToken = AuthStorageService.getRefreshToken();
+            if (!refreshToken) return;
+
+            await AuthService.logout(refreshToken);
             AuthStorageService.clearTokens();
         },
         onSuccess: () => {
-            queryClient.setQueryData(['loggedInUser'], null); // Clear user data from cache
-            window.location.href = ROUTES.AUTH; // Redirect to login
+            queryClient.setQueryData([QUERY_KEYS.LOGGED_IN_USER], null);
         },
     });
 
     const handleAuthResponse = (authResponse: AuthResponse) => {
         AuthStorageService.storeTokens(authResponse.accessToken, authResponse.refreshToken);
         const { refreshToken, accessToken, ...publicUser } = authResponse;
-        queryClient.setQueryData(['loggedInUser'], publicUser); // Update cached user
+        queryClient.setQueryData([QUERY_KEYS.LOGGED_IN_USER], publicUser); // Update cached user
     };
 
     return (

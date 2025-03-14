@@ -59,6 +59,15 @@ export const AuthService = {
             throw error;
         }
     },
+
+    async logout(refreshToken: string) {
+        try {
+            await axiosInstance.post(`${ROUTE_PREFIX}/logout`, { refreshToken });
+        } catch (error) {
+            console.error('Error in logout:', error);
+            throw error;
+        }
+    },
     async me() {
         try {
             const response = await axiosInstance.get(`${ROUTE_PREFIX}/me`);
