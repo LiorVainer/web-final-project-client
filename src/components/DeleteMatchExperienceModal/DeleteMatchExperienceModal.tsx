@@ -30,10 +30,6 @@ export const DeleteMatchExperienceModal = ({ matchExperienceId, onClose }: Delet
         onClose();
     };
 
-    const handleConfirm = () => {
-        deleteMutate();
-    };
-
     return (
         <Modal
             title="Delete Match Experience"
@@ -43,7 +39,7 @@ export const DeleteMatchExperienceModal = ({ matchExperienceId, onClose }: Delet
                 <Button key="cancel" onClick={handleCancel} disabled={isPending}>
                     Cancel
                 </Button>,
-                <Button key="confirm" type="primary" danger onClick={handleConfirm} loading={isPending}>
+                <Button key="confirm" type="primary" danger onClick={() => deleteMutate()} loading={isPending}>
                     Confirm
                 </Button>,
             ]}
