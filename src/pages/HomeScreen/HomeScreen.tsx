@@ -60,11 +60,12 @@ export const HomeScreen = ({}: HomeScreenProps) => {
                 ) : (
                     <div>No matchExperiences found.</div>
                 )}
-            </div>
-            <div className={classes.pagination}>
+
+                <div className={classes.pagination}>
                 <Button
                     onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                     disabled={page === 1}
+                    className={classes.pageButton}
                 >
                     Previous
                 </Button>
@@ -72,10 +73,13 @@ export const HomeScreen = ({}: HomeScreenProps) => {
                 <Button
                     onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={page === totalPages}
+                    className={classes.pageButton}
                 >
                     Next
                 </Button>
+                </div>
             </div>
+           
 
             <button className={classes.floatingButton} onClick={() => setIsModalOpen(true)}>
                 <FaFutbol className={classes.icon} />
