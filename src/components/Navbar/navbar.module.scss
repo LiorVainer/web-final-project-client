@@ -96,7 +96,12 @@ $link-hover-color: #000;
 }
 
 .dropdownContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
     text-align: center;
+    justify-content: center;
+    align-items: center;
     padding: 15px;
     width: 250px;
 }
@@ -123,8 +128,8 @@ $link-hover-color: #000;
 }
 
 .customizeProfileButton {
-    display: block;
-    margin: 10px auto;
+    display: flex;
+    gap: 0.5rem;
     font-size: 14px;
 }
 
@@ -133,11 +138,11 @@ $link-hover-color: #000;
 }
 
 .logoutButton {
-    display: block;
-    margin: 0 auto;
+    display: flex;
+
     width: 80%;
-    text-align: center;
 }
+
 .uploadFormItem :global(.ant-form-item-explain-error) {
     text-align: center !important;
     display: block;

@@ -14,7 +14,6 @@ import { useNavigate } from 'react-router';
 import { Screen } from '@components/Screen';
 import { AuthFormValidationRules } from '@pages/AuthPage/auth.validation.ts';
 import clsx from 'clsx';
-import { AuthStorageService } from '@api/services/auth-storage.service.ts';
 import { AuthFormAnimationVariants } from '@pages/AuthPage/auth.animations.ts';
 
 const { Text } = Typography;
@@ -49,7 +48,7 @@ export const AuthPage = () => {
                 throw new Error('No response received');
             }
 
-            AuthStorageService.storeTokens(loginResponse.accessToken, loginResponse.refreshToken);
+            handleAuthResponse(loginResponse);
             navigate('/');
         } catch (error) {
             console.error('Google login error', error);

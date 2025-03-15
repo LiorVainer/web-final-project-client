@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { AuthStorageService } from '@api/services/auth-storage.service.ts';
 import { AuthResponse, PublicUser } from '@/models/user.model.ts';
 import { AuthService } from '@api/services/auth.service.ts';
@@ -8,6 +8,8 @@ import { QUERY_KEYS } from '../api/constants/query-keys.const';
 interface AuthContextType {
     loggedInUser: PublicUser | null | undefined;
     isLoading: boolean;
+    isGoogleUser: boolean;
+    doesUserHasGooglePicture: boolean;
     handleAuthResponse: (authResponse: AuthResponse) => void;
     logout: () => void;
 }
@@ -25,6 +27,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
         retry: 1,
     });
+
+    const doesUserHasGooglePicture = useMemo(() => loggedInUser?.picture.includes('https') ?? false, [loggedInUser]);
+    const isGoogleUser = useMemo(() => !!loggedInUser?.googleId, [loggedInUser]);
 
     const logoutMutation = useMutation({
         mutationFn: async () => {
@@ -46,7 +51,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ loggedInUser, isLoading, handleAuthResponse, logout: logoutMutation.mutate }}>
+        <AuthContext.Provider
+            value={{
+                loggedInUser,
+                isLoading,
+                isGoogleUser,
+                handleAuthResponse,
+                logout: logoutMutation.mutate,
+                doesUserHasGooglePicture,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );

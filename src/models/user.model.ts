@@ -6,6 +6,7 @@ export const UserSchema = z.object({
     password: z.string(),
     email: z.string(),
     picture: z.string(),
+    googleId: z.string().optional(),
     createdAt: zodDate,
     updatedAt: zodDate,
     refreshTokens: z.string().array().optional(),
@@ -17,7 +18,7 @@ export type RegisterPayload = z.infer<typeof RegisterPayload>;
 export const LoginPayload = UserSchema.pick({ email: true, password: true });
 export type LoginPayload = z.infer<typeof LoginPayload>;
 
-export const UserUpdatePayload = UserSchema.pick({ picture: true, username: true, email: true });
+export const UserUpdatePayload = UserSchema.pick({ picture: true, username: true, email: true }).partial();
 export type UserUpdatePayload = z.infer<typeof UserUpdatePayload>;
 
 export type User = z.infer<typeof UserSchema>;

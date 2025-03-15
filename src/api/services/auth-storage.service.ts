@@ -3,7 +3,6 @@ export const ACCESS_TOKEN_KEY = 'accessToken';
 
 export const AuthStorageService = {
     storeTokens(accessToken?: string, refreshToken?: string) {
-        console.log({ accessToken, refreshToken });
         accessToken && localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
         refreshToken && localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
     },
