@@ -12,6 +12,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import moment from 'moment';
 import { Heart, MessageCircle } from 'lucide-react';
+import { ROUTES } from '@/constants/routes.const';
+import { useNavigate } from "react-router-dom"; // ✅ Import for navigation
 
 export interface HomeScreenProps {}
 
@@ -20,6 +22,9 @@ const currentUserId = '67d59deca4f31a06c566dbc2'; // creator
 export const HomeScreen = ({}: HomeScreenProps) => {
     const [page, setPage] = useState(1); // Track current page
     const [sortBy, setSortBy] = useState("date"); // Default sort
+
+    const navigate = useNavigate(); // ✅ Hook for navigation
+
 
     const limit = 5; // Number of items per page
 
@@ -73,7 +78,8 @@ export const HomeScreen = ({}: HomeScreenProps) => {
             <div className={classes.matchList}>
                 {matchExperiences?.length ? (
                     matchExperiences.map((matchExperience) => (
-                            <div className={classes.matchCard} key={matchExperience._id}>
+                            <div className={classes.matchCard} key={matchExperience._id} 
+                            onClick={() => navigate(`${ROUTES.MATCH_EXPERIENCE}/${matchExperience._id}`)}>
                                 <div>
                                     {matchExperience.picture && (
                                         <img
