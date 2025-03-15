@@ -1,0 +1,108 @@
+@use '../../theme/theme' as theme;
+
+.container {
+    padding-inline: 20rem;
+    gap: 2rem;
+    padding-block: 5rem;
+}
+
+.button {
+    @include theme.trans-button();
+}
+
+.floatingButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px; 
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: white;
+    border: 4px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+    z-index: 1000;
+
+    &:hover {
+        transform: scale(1.1);
+    }
+}
+
+.icon {
+    font-size: 50px;
+    color: black;
+}
+
+.plusIcon {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+    border: 2px solid white;
+}
+
+.matchCard {
+    border-radius: 20px;
+    padding: 20px;
+    background-color: white;
+    width: 750px;
+    margin-bottom: 15px;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    border: 2px solid white;
+}
+
+.matchList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pageButton {
+    min-width: 75px;
+    margin: 5px;
+}
+
+.test {
+    display: flex;
+    justify-content: space-between;
+}
+
+.contentTime {
+    font-size: 0.875rem;
+    color: gray-scale(20%);
+}
+
+.likes {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: red;
+}
+
+.comments {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #197fe6;
+}
+
+.rightSide {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+}

@@ -1,5 +1,5 @@
 import ShareMatchExperienceModal from '@/components/ShareMatchExperienceModal';
-import classes from './home-screen.module.scss';
+import classes from './my-experiences.module.scss';
 import { PlusOutlined } from '@ant-design/icons';
 import { FaFutbol } from 'react-icons/fa';
 import { Button, Select } from "antd";
@@ -15,11 +15,11 @@ import { Heart, MessageCircle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes.const';
 import { useNavigate } from "react-router-dom"; // ✅ Import for navigation
 
-export interface HomeScreenProps {}
+export interface MyExperiencesProps {}
 
-const currentUserId = '67d5ba8eb00eec160cdbd0ef'; // creator
+const currentUserId = '67d5b9e3b00eec160cdbd0d9'; // creator
 
-export const HomeScreen = ({}: HomeScreenProps) => {
+export const MyExperiences = ({}: MyExperiencesProps) => {
     const [page, setPage] = useState(1); // Track current page
     const [sortBy, setSortBy] = useState("date"); // Default sort
 
@@ -36,7 +36,7 @@ export const HomeScreen = ({}: HomeScreenProps) => {
         isPending: matchExperiencesIsPending, 
         refetch } = useQuery({
         queryKey: ["matchExperiences", page, sortBy], // Cache per page
-        queryFn: () => MatchExperienceService.getAllMatchExperience(page, limit, sortBy), // Fetch function
+        queryFn: () => MatchExperienceService.getAllMatchExperiencesByUserId(currentUserId, page, limit, sortBy), // Fetch function
     });
     
     console.log(matchExperiencesData);

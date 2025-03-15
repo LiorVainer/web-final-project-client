@@ -4,6 +4,7 @@ import { HomeScreen } from '@pages/HomeScreen';
 import { Layout } from '@/layout/Layout';
 import { MatchExperiencesCatalogScreen } from '@pages/MatchExperiencesCatalogScreen';
 import { ROUTES } from '@/constants/routes.const';
+import { MyExperiences } from '@/pages/MyExperiences';
 
 export interface RouterProps {}
 
@@ -16,6 +17,7 @@ export const Router = (_props: RouterProps) => {
                     <Route index element={<MatchExperiencesCatalogScreen />}></Route>
                 </Route>
 
+                <Route path={ROUTES.MY_EXPERIENCES} element={<MyExperiences />} />
                 <Route path="/" element={<HomeScreen />} />
             </Route>
         </Routes>

@@ -32,6 +32,24 @@ export const MatchExperienceService = {
         }
     },
 
+    async getAllMatchExperiencesByUserId(userId: string, page = 1, limit = 5, sortBy = "date") {
+        try {
+            const response = await axiosInstance.get(`${ROUTE_PREFIX}/user/${userId}`, {
+                params: { page, limit, sortBy },
+            });
+
+            const { data, success, error } = PaginatedMatchExperiencesSchema.safeParse(response.data);
+            if (!success) {
+                console.error(`Invalid response format for user ${userId} match experiences:`, error);
+            }
+
+            return data;
+        } catch (error) {
+            console.error(`Error fetching match experiences for user ${userId}:`, error);
+            throw error;
+        }
+    },
+
     async getMatchExperienceById(id: string) {
         try {
             const response = await axiosInstance.get<MatchExperience>(`${ROUTE_PREFIX}/${id}`);
