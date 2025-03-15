@@ -26,8 +26,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         retry: 1,
     });
 
-    console.log(loggedInUser);
-
     const logoutMutation = useMutation({
         mutationFn: async () => {
             const refreshToken = AuthStorageService.getRefreshToken();

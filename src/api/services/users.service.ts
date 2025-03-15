@@ -57,7 +57,7 @@ export const UsersService = {
         }
     },
 
-    async updateUser(userId: string, userData: User) {
+    async updateUser(userId: string, userData: Partial<User>) {
         try {
             const response = await axiosInstance.put(`${ROUTE_PREFIX}/${userId}`, userData);
 
