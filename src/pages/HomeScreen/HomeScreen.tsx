@@ -2,17 +2,14 @@ import ShareMatchExperienceModal from '@/components/ShareMatchExperienceModal';
 import classes from './home-screen.module.scss';
 import { PlusOutlined } from '@ant-design/icons';
 import { FaFutbol } from 'react-icons/fa';
-import { useQueryService } from '@api/hooks/service.query.ts';
-import { UsersService } from '@api/services/users.service.ts';
-import { Button } from 'antd';
-import { useMemo, useState } from 'react';
+import { Button, Select } from "antd";
+
+import { useState } from 'react';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { MatchDetails } from '@components/MatchDetails';
-import { MatchExperience } from '@/models/match-experience.model.ts';
 import { Screen } from '@components/Screen';
 import { useQuery } from '@tanstack/react-query';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
-import { MatchExperienceActions } from '@/components/MatchExperienceActions';
 import moment from 'moment';
 import { Heart, MessageCircle } from 'lucide-react';
 
@@ -22,22 +19,24 @@ const currentUserId = '67d59deca4f31a06c566dbc2'; // creator
 
 export const HomeScreen = ({}: HomeScreenProps) => {
     const [page, setPage] = useState(1); // Track current page
+    const [sortBy, setSortBy] = useState("date"); // Default sort
+
     const limit = 5; // Number of items per page
 
     // const { data, error, isPending } = useQueryService({ service: UsersService, method: 'getUsers' });
 
-    const { data: matchExperiencesData,
+    const { 
+        data: matchExperiencesData,
         error: matchExperiencesError,
         isPending: matchExperiencesIsPending, 
         refetch } = useQuery({
-        queryKey: ["matchExperiences", page], // Cache per page
-        queryFn: () => MatchExperienceService.getAllMatchExperience(page, limit), // Fetch function
+        queryKey: ["matchExperiences", page, sortBy], // Cache per page
+        queryFn: () => MatchExperienceService.getAllMatchExperience(page, limit, sortBy), // Fetch function
     });
     
     console.log(matchExperiencesData);
 
     const totalPages = matchExperiencesData?.totalPages || 1;
-
     const matchExperiences = matchExperiencesData?.experiences || [];
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,6 +56,20 @@ export const HomeScreen = ({}: HomeScreenProps) => {
         <Screen className={classes.container}>
         <div>
             <h1>Home Screen</h1>
+
+            {/* ✅ Sorting Dropdown */}
+            <Select
+                value={sortBy}
+                onChange={(value) => {
+                    setSortBy(value);
+                    setPage(1); // Reset to first page on sorting change
+                }}
+                className={classes.sortDropdown}
+            >
+                <Select.Option value="date">Sort by Date</Select.Option>
+                <Select.Option value="likes">Sort by Likes</Select.Option>
+            </Select>
+
             <div className={classes.matchList}>
                 {matchExperiences?.length ? (
                     matchExperiences.map((matchExperience) => (
