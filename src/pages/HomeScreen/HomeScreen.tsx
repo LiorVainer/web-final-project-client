@@ -5,14 +5,18 @@ import { FaFutbol } from 'react-icons/fa';
 import { useQueryService } from '@api/hooks/service.query.ts';
 import { UsersService } from '@api/services/users.service.ts';
 import { Button } from 'antd';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { MatchDetails } from '@components/MatchDetails';
 import { MatchExperience } from '@/models/match-experience.model.ts';
 import { Screen } from '@components/Screen';
 import { useQuery } from '@tanstack/react-query';
+import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { MatchExperienceActions } from '@/components/MatchExperienceActions';
 
 export interface HomeScreenProps {}
+
+const currentUserId = '67c84091c494f0388a69261d'; // creator
 
 export const HomeScreen = ({}: HomeScreenProps) => {
     const [page, setPage] = useState(1); // Track current page
@@ -29,7 +33,6 @@ export const HomeScreen = ({}: HomeScreenProps) => {
     });
     
     console.log(matchExperiencesData);
-    
 
     const totalPages = matchExperiencesData?.totalPages || 1;
 
@@ -43,7 +46,9 @@ export const HomeScreen = ({}: HomeScreenProps) => {
     }
 
     if (!matchExperiencesData || matchExperiencesIsPending) {
-        return <Button>Loading...</Button>;
+        return  <Screen className={classes.container}>
+            <Button>Loading...</Button>;
+        </Screen>   
     }
 
     return (
@@ -54,7 +59,18 @@ export const HomeScreen = ({}: HomeScreenProps) => {
                 {matchExperiences?.length ? (
                     matchExperiences.map((matchExperience) => (
                             <div className={classes.matchCard} key={matchExperience._id}>
-                                <MatchDetails matchExperience={matchExperience as MatchExperience} />
+                                <div>
+                                    {matchExperience.picture && (
+                                        <img
+                                            src={getPictureFullUrl(matchExperience.picture)}
+                                            alt={matchExperience.title}
+                                            className={classes.image}
+                                        />
+                                    )}
+                                </div>
+                                <div className={classes.test}>
+                                    <MatchDetails matchExperience={matchExperience as MatchExperience} />
+                                </div>
                             </div>
                     ))
                 ) : (
