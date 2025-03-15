@@ -57,7 +57,7 @@
     border-radius: 20px;
     padding: 20px;
     background-color: white;
-    width: 500px;
+    width: 750px;
     margin-bottom: 15px;
     // display: flex;
     // align-items: center;
@@ -74,4 +74,35 @@
 .pageButton {
     min-width: 75px;
     margin: 5px;
+}
+
+.test {
+    display: flex;
+    justify-content: space-between;
+}
+
+.contentTime {
+    font-size: 0.875rem;
+    color: gray-scale(20%);
+}
+
+.likes {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: red;
+}
+
+.comments {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #197fe6;
+}
+
+.rightSide {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
 }

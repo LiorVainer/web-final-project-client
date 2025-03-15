@@ -13,12 +13,12 @@ export const Navbar = () => {
             </Link>
 
             <div className={classes.right}>
-                {/*<div className={classes.navLinks}>*/}
-                {/*    <Link to="/groups">Groups</Link>*/}
-                {/*    <Link to="/history">History</Link>*/}
-                {/*    <Link to="/saved">Saved</Link>*/}
-                {/*    <Link to="/settings">Settings</Link>*/}
-                {/*</div>*/}
+                <div className={classes.navLinks}>
+                    <Link to="/groups">My Expriences</Link>
+                    {/* <Link to="/history">History</Link>
+                    <Link to="/saved">Saved</Link>
+                    <Link to="/settings">Settings</Link> */}
+                </div> 
 
                 <Link to={'/'} className={classes.userProfile}>
                     <img src="https://picsum.photos/40/40" alt="User Avatar" className={classes.avatar} />

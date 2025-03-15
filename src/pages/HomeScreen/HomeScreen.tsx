@@ -13,10 +13,12 @@ import { Screen } from '@components/Screen';
 import { useQuery } from '@tanstack/react-query';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import { MatchExperienceActions } from '@/components/MatchExperienceActions';
+import moment from 'moment';
+import { Heart, MessageCircle } from 'lucide-react';
 
 export interface HomeScreenProps {}
 
-const currentUserId = '67c84091c494f0388a69261d'; // creator
+const currentUserId = '67d59deca4f31a06c566dbc2'; // creator
 
 export const HomeScreen = ({}: HomeScreenProps) => {
     const [page, setPage] = useState(1); // Track current page
@@ -69,7 +71,24 @@ export const HomeScreen = ({}: HomeScreenProps) => {
                                     )}
                                 </div>
                                 <div className={classes.test}>
-                                    <MatchDetails matchExperience={matchExperience as MatchExperience} />
+                                    <MatchDetails matchExperience={matchExperience} />
+                                    <div className={classes.rightSide}>
+                                        <p className={classes.contentTime}>
+                                            posted {moment(matchExperience.createdAt).fromNow()}
+                                        </p>
+                                        <div className={classes.likes} >
+                                            <div>
+                                                {matchExperience.likes.length} likes 
+                                            </div>
+                                            <Heart size={15} />
+                                        </div>
+                                        <div  className={classes.comments} >
+                                            <div>
+                                                {matchExperience.comments.length} comments
+                                            </div>
+                                            <MessageCircle size={15} />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                     ))

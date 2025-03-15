@@ -29,7 +29,7 @@ export const CreateMatchExperienceSchema = MatchExperiencePayloadSchema.omit({ _
 });
 
 export const PaginatedMatchExperiencesSchema = z.object({
-    experiences: z.array(MatchExperiencePayloadSchema), // Array of match experiences
+    experiences: z.array(MatchExperienceSchema), // Array of match experiences
     totalPages: z.number(), // Total number of pages in pagination
 });
 
