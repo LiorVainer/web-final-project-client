@@ -9,8 +9,6 @@ import styles from './share-match-experience-modal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
-import { AiService } from '@/api/services/ai.service';
-import { formatObject } from '@/utils/formatObject.utils';
 
 const MatchExperienceSchema = Yup.object().shape({
     title: Yup.string().min(3, 'Title is too short').required('Title is required'),
@@ -90,13 +88,8 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         try {
             const formValues = getValues();
             const { matchDate, ...rest } = formValues;
-            const formattedValues = formatObject(rest);
 
-            const prompt = `Generate a short, engaging match experience description based on these details. 
-                Capture the emotions, key moments, and atmosphere in a concise way. 
-                Only return the description itself—do not include introductions, explanations, or extra text. 
-                Match details: ${formattedValues}`;
-            const response = await AiService.generateText(prompt);
+            const response = await MatchExperienceService.betterDescription(rest);
 
             if (response) {
                 setValue('description', response);
