@@ -172,15 +172,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
                 uploadedImageUrl = data.url.split('public/')[1];
             }
 
-<<<<<<< HEAD:src/components/ShareMatchExperienceModal/index.tsx
-            await MatchExperienceService.createMatchExperience({
-                ...values,
-                picture: uploadedImageUrl,
-                createdBy: '67d5b9e3b00eec160cdbd0d9',
-            });
-=======
             const { picture, ...valuesWithConvertedDate } = { ...values, matchDate: values.matchDate.toDate() };
->>>>>>> 937a42dab0036d2698032182bf97b333847a9653:src/components/ShareMatchExperienceModal/ShareMatchExperienceModal.tsx
 
             if (existingMatchExperience) {
                 existingMatchExperience.picture &&
