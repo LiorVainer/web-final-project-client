@@ -132,3 +132,10 @@ export const useMutationService = <TService, TMethod extends keyof QueryConfig<T
         ...options,
     });
 };
+
+export const useQueryOnDefinedParam = <T, P>(key: string, param: P | undefined, fetchFn: (param: P) => Promise<T>) =>
+    useQuery({
+        queryKey: [key, param],
+        queryFn: async () => (param !== undefined ? fetchFn(param) : Promise.resolve([] as T)),
+        enabled: param !== undefined,
+    });

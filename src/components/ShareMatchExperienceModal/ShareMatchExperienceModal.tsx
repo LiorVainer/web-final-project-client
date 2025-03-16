@@ -1,93 +1,126 @@
-import { useState } from 'react';
-import { Modal, Form, Input, Button, AutoComplete, Upload, message, DatePicker, Row, Col } from 'antd';
+import { useEffect, useState } from 'react';
+import { AutoComplete, Button, Col, DatePicker, Form, Input, message, Modal, Row, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, Controller } from 'react-hook-form';
+import dayjs, { Dayjs } from 'dayjs';
+import { Controller, useForm } from 'react-hook-form';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import styles from './share-match-experience-modal.module.scss';
 import { MatchExperienceService } from '@/api/services/match-experience.service';
 import { SoccerService } from '@/api/services/soccer.service';
 import { FileService } from '@/api/services/file.service';
+import { useQueryOnDefinedParam } from '@api/hooks/service.query.ts';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { MatchExperience } from '@/models/match-experience.model.ts';
+import { calculateCurrentSeason } from '@/utils/date.utils.ts';
+import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 
-const MatchExperienceSchema = Yup.object().shape({
-    title: Yup.string().min(3, 'Title is too short').required('Title is required'),
-    description: Yup.string().min(10, 'Description is too short').required('Description is required'),
-    picture: Yup.string().optional(),
-    country: Yup.string().required('Country is required'),
-    stadium: Yup.string().required('Stadium is required'),
-    league: Yup.string().required('League is required'),
-    homeTeam: Yup.string().required('Home Team is required'),
-    awayTeam: Yup.string().required('Away Team is required'),
-    matchDate: Yup.date().required('Match date is required'),
+const MatchExperienceFormValuesSchema = z.object({
+    title: z.string().min(3, 'Title is too short').nonempty('Title is required'),
+    description: z.string().min(10, 'Description is too short').nonempty('Description is required'),
+    picture: z.string().optional(),
+    country: z.string().nonempty('Country is required'),
+    stadium: z.string().nonempty('Stadium is required'),
+    league: z.string().nonempty('League is required'),
+    leaugeId: z.number().optional(),
+    homeTeam: z.string().nonempty('Home Team is required'),
+    awayTeam: z.string().nonempty('Away Team is required'),
+    matchDate: z.preprocess(
+        (val) => (typeof val === 'string' || val instanceof Date ? dayjs(val) : val),
+        z.custom<Dayjs>((val) => dayjs.isDayjs(val), { message: 'Invalid date format' })
+    ),
 });
 
-export const useQueryOnDefinedParam = <T, P>(key: string, param: P | undefined, fetchFn: (param: P) => Promise<T>) =>
-    useQuery({
-        queryKey: [key, param],
-        queryFn: async () => (param !== undefined ? fetchFn(param) : Promise.resolve([] as T)),
-        enabled: param !== undefined,
-    });
+type MatchExperienceFormValues = z.infer<typeof MatchExperienceFormValuesSchema>;
 
-type ShareMatchExperienceModalProps = {
-    isOpen: boolean;
-    onClose: () => void;
+const DEFAULT_INITIAL_VALUES: MatchExperienceFormValues = {
+    title: '',
+    description: '',
+    picture: '',
+    country: '',
+    stadium: '',
+    league: '',
+    homeTeam: '',
+    awayTeam: '',
+    matchDate: dayjs(),
 };
 
-type ShareMatchExperienceModalValues = Yup.InferType<typeof MatchExperienceSchema>;
+type ShareMatchExperienceModalProps = {
+    onClose: () => void;
+    existingMatchExperience?: MatchExperience;
+};
 
-const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModalProps) => {
+export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: ShareMatchExperienceModalProps) => {
     const [imageUrl, setImageUrl] = useState<string>('');
-    const [selectedCountry, setSelectedCountry] = useState<string>('');
-    const [selectedLeague, setSelectedLeague] = useState<number>();
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedLeagueId, setSelectedLeagueId] = useState<number>();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const queryClient = useQueryClient();
 
     const {
+        getValues,
         control,
         handleSubmit,
         setValue,
         reset,
-        getValues,
         trigger,
         watch,
         formState: { errors },
-    } = useForm<ShareMatchExperienceModalValues>({
-        resolver: yupResolver(MatchExperienceSchema),
+    } = useForm<MatchExperienceFormValues>({
+        resolver: zodResolver(MatchExperienceFormValuesSchema),
+        defaultValues: existingMatchExperience
+            ? { ...existingMatchExperience, matchDate: dayjs(existingMatchExperience.matchDate) }
+            : { ...DEFAULT_INITIAL_VALUES },
     });
 
     const { picture, description, ...rest } = watch();
     const isAiButtonDisabled =
         Object.keys(rest).length === 0 || Object.values(rest).some((value) => value === undefined || value === '');
 
-    const calculateCurrentSeason = (date: Date): number => {
-        return date.getMonth() >= 6 ? date.getFullYear() : date.getFullYear() - 1;
-    };
+    const { data: countries = [] } = useQuery({
+        queryKey: ['countries'],
+        queryFn: SoccerService.getCountries,
+    });
 
-    const { data: countries = [] } = useQueryOnDefinedParam('countries', isOpen, SoccerService.getCountries);
     const { data: leagues = [] } = useQueryOnDefinedParam(
         'leagues',
-        selectedCountry ? selectedCountry : undefined,
+        getValues('country') ? getValues('country') : undefined,
         SoccerService.getLeagues
     );
+
     const { data: stadiums = [] } = useQueryOnDefinedParam(
         'stadiums',
-        selectedCountry ? selectedCountry : undefined,
+        getValues('country') ? getValues('country') : undefined,
         SoccerService.getVenues
     );
 
     const { data: teams = [] } = useQueryOnDefinedParam(
         'teams',
-        selectedLeague && selectedDate
-            ? { leagueId: selectedLeague, season: calculateCurrentSeason(new Date(selectedDate)) }
+        selectedLeagueId && getValues('matchDate')
+            ? { leagueId: selectedLeagueId, season: calculateCurrentSeason(getValues('matchDate').toDate()) }
             : undefined,
         ({ leagueId, season }) => SoccerService.getTeams({ leagueId, season })
     );
 
+    useEffect(() => {
+        if (existingMatchExperience && leagues && !selectedLeagueId) {
+            const leagueId = leagues.find((league) => league.league.name === existingMatchExperience?.league)?.league
+                .id;
+
+            setSelectedLeagueId(leagueId);
+        }
+    }, [leagues]);
+
+    const resetTeams = () => {
+        queryClient.setQueryData(['teams'], []);
+    };
+
     const fetchAIHelp = async () => {
         try {
-            const response = await MatchExperienceService.betterDescription(getValues());
+            const response = await MatchExperienceService.betterDescription({
+                ...getValues(),
+                matchDate: getValues().matchDate.toDate(),
+            });
 
             if (response) {
                 setValue('description', response);
@@ -100,24 +133,19 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         }
     };
 
-    const resetTeams = () => {
-        queryClient.setQueryData(['teams'], []);
-    };
-
     const resetValuesOnCountryChange = (value: string) => {
-        setSelectedCountry(value);
         setValue('country', value);
         setValue('league', '');
         setValue('stadium', '');
         setValue('homeTeam', '');
         setValue('awayTeam', '');
-        setSelectedLeague(undefined);
+        setSelectedLeagueId(undefined);
         resetTeams();
         trigger('country');
     };
 
     const resetValuesOnLeagueChange = (value: string, id: number | undefined) => {
-        setSelectedLeague(id);
+        setSelectedLeagueId(id);
         setValue('league', value);
         setValue('homeTeam', '');
         setValue('awayTeam', '');
@@ -125,25 +153,12 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         trigger('league');
     };
 
-    const resetValuesOnChange = (key: keyof ShareMatchExperienceModalValues, value: string) => {
+    const resetValuesOnChange = (key: keyof MatchExperienceFormValues, value: string) => {
         setValue(key, value);
         trigger(key);
     };
 
-    const onDateChange = (date: Date | null) => {
-        setSelectedDate(date);
-        if (date) {
-            setValue('matchDate', date);
-            setValue('homeTeam', '');
-            setValue('awayTeam', '');
-            resetTeams();
-            trigger('matchDate');
-        } else {
-            trigger('matchDate');
-        }
-    };
-
-    const onSubmit = async (values: ShareMatchExperienceModalValues) => {
+    const onSubmit = async (values: MatchExperienceFormValues) => {
         const isValid = await trigger();
         if (!isValid) return;
 
@@ -154,38 +169,51 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                 const formData = new FormData();
                 formData.append('file', selectedFile);
                 const { data } = await FileService.handleUpload(formData);
-                uploadedImageUrl = data.url.split('/public/')[1];
+                uploadedImageUrl = data.url.split('public/')[1];
             }
 
-            await MatchExperienceService.createMatchExperience({
-                ...values,
-                picture: uploadedImageUrl,
-                createdBy: '123412341234123412341234',
-            });
+            const { picture, ...valuesWithConvertedDate } = { ...values, matchDate: values.matchDate.toDate() };
 
-            message.success('MatchExperience created successfully');
+            if (existingMatchExperience) {
+                existingMatchExperience.picture &&
+                    uploadedImageUrl &&
+                    (await FileService.handleDelete(existingMatchExperience.picture));
+
+                await MatchExperienceService.updateMatchExperience(existingMatchExperience._id, {
+                    ...valuesWithConvertedDate,
+                    ...(uploadedImageUrl && { picture: uploadedImageUrl }),
+                });
+
+                queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, existingMatchExperience._id] });
+
+                message.success('Match Experience updated successfully');
+            } else {
+                await MatchExperienceService.createMatchExperience({
+                    ...valuesWithConvertedDate,
+                    picture: uploadedImageUrl,
+                    createdBy: '123412341234123412341234',
+                });
+
+                message.success('Match Experience Shared successfully');
+            }
             reset();
             setImageUrl('');
-            setSelectedCountry('');
-            setSelectedLeague(undefined);
-            setSelectedDate(null);
+            setSelectedLeagueId(undefined);
             resetTeams();
             onClose();
         } catch (error) {
-            message.error('An error occurred while submitting the matchExperience.');
+            message.error('An error occurred while submitting the match experience.');
         }
     };
 
     return (
         <Modal
             title="Share your match experience"
-            open={isOpen}
+            open
             onCancel={() => {
                 reset();
                 setImageUrl('');
-                setSelectedCountry('');
-                setSelectedLeague(undefined);
-                setSelectedDate(null);
+                setSelectedLeagueId(undefined);
                 resetTeams();
                 onClose();
             }}
@@ -202,7 +230,13 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                         name="matchDate"
                         control={control}
                         render={({ field }) => (
-                            <DatePicker {...field} style={{ width: '100%' }} onChange={onDateChange} />
+                            <DatePicker
+                                {...field}
+                                format={'DD/MM/YYYY'}
+                                value={field.value ? dayjs(field.value) : null}
+                                style={{ width: '100%' }}
+                                onChange={(date) => setValue('matchDate', date ? dayjs(date) : dayjs())}
+                            />
                         )}
                     />
                 </Form.Item>
@@ -229,7 +263,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                         onSelect={(value, option) => resetValuesOnLeagueChange(value, option.id)}
                         onClear={() => resetValuesOnLeagueChange('', undefined)}
                         placeholder="Select a league"
-                        disabled={!selectedCountry}
+                        disabled={!getValues('country')}
                         allowClear
                     />
                 </Form.Item>
@@ -245,7 +279,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                         onSelect={(value) => resetValuesOnChange('stadium', value)}
                         onClear={() => resetValuesOnChange('stadium', '')}
                         placeholder="Select a stadium"
-                        disabled={!selectedCountry}
+                        disabled={!getValues('country')}
                         allowClear
                     />
                 </Form.Item>
@@ -260,12 +294,12 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                             <AutoComplete
                                 value={getValues('homeTeam')}
                                 options={teams
-                                    .filter((team) => team.team.name !== getValues().awayTeam)
+                                    .filter((team) => team.team.name !== getValues('awayTeam'))
                                     .map((option) => ({ value: option.team.name }))}
                                 onSelect={(value) => resetValuesOnChange('homeTeam', value)}
                                 onClear={() => resetValuesOnChange('homeTeam', '')}
                                 placeholder="Select home team"
-                                disabled={!selectedLeague || !selectedDate}
+                                disabled={!getValues('league') || !getValues('matchDate')}
                                 allowClear
                             />
                         </Form.Item>
@@ -280,12 +314,12 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                             <AutoComplete
                                 value={getValues('awayTeam')}
                                 options={teams
-                                    .filter((team) => team.team.name !== getValues().homeTeam)
+                                    .filter((team) => team.team.name !== getValues('homeTeam'))
                                     .map((option) => ({ value: option.team.name }))}
                                 onSelect={(value) => resetValuesOnChange('awayTeam', value)}
                                 onClear={() => resetValuesOnChange('awayTeam', '')}
                                 placeholder="Select away team"
-                                disabled={!selectedLeague || !selectedDate}
+                                disabled={!getValues('league') || !getValues('matchDate')}
                                 allowClear
                             />
                         </Form.Item>
@@ -339,25 +373,32 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
                         showUploadList={true}
                     >
                         <Button className={styles.uploadButton} icon={<UploadOutlined />} block>
-                            Upload Your Picture
+                            {existingMatchExperience ? 'Upload New Picture' : 'Upload Your Picture'}
                         </Button>
                     </Upload>
                 </Form.Item>
 
-                {imageUrl && (
-                    <div className="image-preview-container">
-                        <img src={imageUrl} alt="Uploaded Preview" className="image-preview" />
+                {(existingMatchExperience || imageUrl) && (
+                    <div className={styles.imagePreviewContainer}>
+                        <img
+                            src={
+                                imageUrl
+                                    ? imageUrl
+                                    : existingMatchExperience?.picture &&
+                                      getPictureFullUrl(existingMatchExperience.picture)
+                            }
+                            alt="Uploaded Preview"
+                            className={styles.imagePreview}
+                        />
                     </div>
                 )}
 
                 <Form.Item>
                     <Button type="primary" htmlType="submit" className={styles.submitButton}>
-                        Share
+                        {existingMatchExperience ? 'Update' : 'Share'}
                     </Button>
                 </Form.Item>
             </Form>
         </Modal>
     );
 };
-
-export default ShareMatchExperienceModal;
