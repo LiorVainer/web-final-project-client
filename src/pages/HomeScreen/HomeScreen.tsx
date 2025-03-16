@@ -15,11 +15,13 @@ import { Heart, MessageCircle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes.const';
 import { useNavigate } from "react-router-dom"; // ✅ Import for navigation
 
-export interface HomeScreenProps {}
+export interface HomeScreenProps {
+    isFromHomeScreen: boolean;
+}
 
-const currentUserId = '67d5ba8eb00eec160cdbd0ef'; // creator
+const currentUserId = '67d592743f1f3c317f54c7de'; // creator
 
-export const HomeScreen = ({}: HomeScreenProps) => {
+export const HomeScreen = ({isFromHomeScreen}: HomeScreenProps) => {
     const [page, setPage] = useState(1); // Track current page
     const [sortBy, setSortBy] = useState("date"); // Default sort
 
@@ -34,9 +36,13 @@ export const HomeScreen = ({}: HomeScreenProps) => {
         data: matchExperiencesData,
         error: matchExperiencesError,
         isPending: matchExperiencesIsPending, 
-        refetch } = useQuery({
-        queryKey: ["matchExperiences", page, sortBy], // Cache per page
-        queryFn: () => MatchExperienceService.getAllMatchExperience(page, limit, sortBy), // Fetch function
+        refetch 
+    } = useQuery({
+        queryKey: isFromHomeScreen ? ["matchExperiences", page, sortBy] : ["userMatchExperiences", page, sortBy, currentUserId],
+        queryFn: () => 
+            isFromHomeScreen 
+                ? MatchExperienceService.getAllMatchExperience(page, limit, sortBy) 
+                : MatchExperienceService.getAllMatchExperiencesByUserId(currentUserId, page, limit, sortBy),
     });
     
     console.log(matchExperiencesData);
