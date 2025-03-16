@@ -64,6 +64,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
         setValue,
         reset,
         trigger,
+        watch,
         formState: { errors },
     } = useForm<MatchExperienceFormValues>({
         resolver: zodResolver(MatchExperienceFormValuesSchema),
@@ -72,15 +73,21 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
             : { ...DEFAULT_INITIAL_VALUES },
     });
 
+    const { picture, description, ...rest } = watch();
+    const isAiButtonDisabled =
+        Object.keys(rest).length === 0 || Object.values(rest).some((value) => value === undefined || value === '');
+
     const { data: countries = [] } = useQuery({
         queryKey: ['countries'],
         queryFn: SoccerService.getCountries,
     });
+
     const { data: leagues = [] } = useQueryOnDefinedParam(
         'leagues',
         getValues('country') ? getValues('country') : undefined,
         SoccerService.getLeagues
     );
+
     const { data: stadiums = [] } = useQueryOnDefinedParam(
         'stadiums',
         getValues('country') ? getValues('country') : undefined,
@@ -106,6 +113,24 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
 
     const resetTeams = () => {
         queryClient.setQueryData(['teams'], []);
+    };
+
+    const fetchAIHelp = async () => {
+        try {
+            const response = await MatchExperienceService.betterDescription({
+                ...getValues(),
+                matchDate: getValues().matchDate.toDate(),
+            });
+
+            if (response) {
+                setValue('description', response);
+                message.success('AI-generated description added!');
+            } else {
+                message.error('Failed to generate description :(');
+            }
+        } catch (error) {
+            message.error('An error occurred while fetching AI help.');
+        }
     };
 
     const resetValuesOnCountryChange = (value: string) => {
@@ -309,12 +334,18 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
                     label="Description"
                     validateStatus={errors.description ? 'error' : ''}
                     help={errors.description?.message}
+                    className={styles.formItem}
                 >
-                    <Controller
-                        name="description"
-                        control={control}
-                        render={({ field }) => <Input.TextArea {...field} />}
-                    />
+                    <div className={styles.descriptionContainer}>
+                        <Controller
+                            name="description"
+                            control={control}
+                            render={({ field }) => <Input.TextArea {...field} className={styles.textArea} />}
+                        />
+                        <Button className={styles.aiButton} onClick={fetchAIHelp} disabled={isAiButtonDisabled}>
+                            Ask AI for help
+                        </Button>
+                    </div>
                 </Form.Item>
 
                 <Form.Item
