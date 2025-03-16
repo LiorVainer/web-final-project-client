@@ -57,8 +57,9 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
         resolver: yupResolver(MatchExperienceSchema),
     });
 
-    const { matchDate, picture, ...rest } = watch();
-    const isAiButtonDisabled = Object.values(rest).some((value) => value === undefined || value === '');
+    const { picture, description, ...rest } = watch();
+    const isAiButtonDisabled =
+        Object.keys(rest).length === 0 || Object.values(rest).some((value) => value === undefined || value === '');
 
     const calculateCurrentSeason = (date: Date): number => {
         return date.getMonth() >= 6 ? date.getFullYear() : date.getFullYear() - 1;
@@ -86,10 +87,7 @@ const ShareMatchExperienceModal = ({ isOpen, onClose }: ShareMatchExperienceModa
 
     const fetchAIHelp = async () => {
         try {
-            const formValues = getValues();
-            const { matchDate, ...rest } = formValues;
-
-            const response = await MatchExperienceService.betterDescription(rest);
+            const response = await MatchExperienceService.betterDescription(getValues());
 
             if (response) {
                 setValue('description', response);
