@@ -15,6 +15,7 @@ import { LiveChatsSection } from '@components/LiveChatsSection';
 import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import { XCircle } from 'lucide-react';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
+import { areDatesInSameHour } from '@/utils/date.utils.ts';
 
 export interface MatchExperienceDetailsScreenProps {}
 
@@ -98,9 +99,16 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                             <div className={classes.experienceContent}>
                                 <div className={classes.topRow}>
                                     <p className={classes.title}>{matchExperience.title}</p>
-                                    <p className={classes.contentTime}>
-                                        posted {moment(matchExperience.createdAt).fromNow()}
-                                    </p>
+                                    <div className={classes.timeContainer}>
+                                        {!areDatesInSameHour(matchExperience.updatedAt, matchExperience.createdAt) && (
+                                            <p className={classes.editTime}>
+                                                ( edited {moment(matchExperience.updatedAt).fromNow()} )
+                                            </p>
+                                        )}
+                                        <p className={classes.contentTime}>
+                                            posted {moment(matchExperience.createdAt).fromNow()}
+                                        </p>
+                                    </div>
                                 </div>
                                 <p className={classes.description}>{matchExperience.description}</p>
                             </div>

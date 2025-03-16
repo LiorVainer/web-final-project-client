@@ -175,4 +175,21 @@ export const MatchExperienceService = {
             throw error;
         }
     },
+
+    async betterDescription(matchExperienceData: Partial<CreateMatchExperienceBody>) {
+        try {
+            const { data } = await axiosInstance.get<string>(`${ROUTE_PREFIX}/better-description`, {
+                params: { ...matchExperienceData },
+            });
+
+            if (!data) {
+                console.error('Not valid response for generating text');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error fetching chat:', error);
+            throw error;
+        }
+    },
 } satisfies Record<string, (...args: any[]) => Promise<any>>;
