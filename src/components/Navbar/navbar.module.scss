@@ -3,7 +3,6 @@ $bg-color: #f9f9f9;
 $text-color: #333;
 $link-hover-color: #000;
 
-// Container
 .navbar {
     display: flex;
     align-items: center;
@@ -14,7 +13,6 @@ $link-hover-color: #000;
     font-family: Arial, sans-serif;
 }
 
-// Left: Brand
 .brand {
     display: flex;
     align-items: center;
@@ -32,7 +30,6 @@ $link-hover-color: #000;
     }
 }
 
-// Middle: Nav Links
 .navLinks {
     display: flex;
     gap: 1.5rem;
@@ -68,94 +65,4 @@ $link-hover-color: #000;
     display: flex;
     align-items: center;
     gap: 4rem;
-}
-
-/* 🔹 Center Profile Image */
-.profileImageContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-/* 🔹 Center Username and Email */
-.textCenter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-/* Small Avatar in Navbar */
-.avatarSmall {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid white;
-    cursor: pointer;
-}
-
-.dropdownContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    width: 250px;
-}
-
-.profileImage {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 3px solid #ccc;
-}
-
-.profileName {
-    display: block;
-    font-size: 16px;
-    font-weight: bold;
-    text-align: center;
-}
-
-.profileEmail {
-    display: block;
-    font-size: 14px;
-    color: gray;
-    text-align: center;
-}
-
-.customizeProfileButton {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 14px;
-}
-
-.divider {
-    margin: 15px auto;
-}
-
-.logoutButton {
-    display: flex;
-
-    width: 80%;
-}
-
-.uploadFormItem :global(.ant-form-item-explain-error) {
-    text-align: center !important;
-    display: block;
-}
-
-.inputField {
-    width: 20rem;
-}
-
-.authForm {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    gap: 5px;
-    align-items: center;
 }
