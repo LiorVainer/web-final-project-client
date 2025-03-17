@@ -16,9 +16,9 @@ export const FileService = {
         }
     },
 
-    async handleDelete(fileUrl: string) {
+    async deleteFile(url: string) {
         try {
-            return axiosInstance.delete(`${ROUTE_PREFIX}/${fileUrl}`);
+            return axiosInstance.delete(`${ROUTE_PREFIX}/${url}`);
         } catch (error) {
             console.error('Error deleting file:', (error as any).message);
             throw error;

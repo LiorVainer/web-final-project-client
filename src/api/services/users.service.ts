@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { PublicUser, PublicUserSchema, User, UserSchema } from '../../models/user.model';
+import { PublicUser, PublicUserSchema, RegisterPayload, User, UserSchema } from '@/models/user.model.ts';
 import { axiosInstance } from '../config/axios-instance';
 
 export const ROUTE_PREFIX = '/users';
@@ -13,7 +12,7 @@ export const UsersService = {
 
             if (!parsedResponse.success) {
                 console.error('Invalid response for fetching users:', parsedResponse.error);
-                return []; 
+                return [];
             }
 
             return parsedResponse.data;
@@ -40,11 +39,11 @@ export const UsersService = {
         }
     },
 
-    async createUser(userData: User) {
+    async createUser(userData: RegisterPayload) {
         try {
             const response = await axiosInstance.post(ROUTE_PREFIX, userData);
 
-            const { data: user, success, error } = UserSchema.safeParse(response.data);
+            const { data: user, success, error } = PublicUserSchema.safeParse(response.data);
 
             if (!success) {
                 console.error('Not valid response for creating user:', error);
@@ -57,11 +56,11 @@ export const UsersService = {
         }
     },
 
-    async updateUser(userId: string, userData: User) {
+    async updateUser(userId: string, userData: Partial<User>) {
         try {
             const response = await axiosInstance.put(`${ROUTE_PREFIX}/${userId}`, userData);
 
-            const { data: user, success, error } = UserSchema.safeParse(response.data);
+            const { data: user, success, error } = PublicUserSchema.safeParse(response.data);
 
             if (!success) {
                 console.error(`Not valid response for updating user with ID ${userId}:`, error);
@@ -70,23 +69,6 @@ export const UsersService = {
             return user;
         } catch (error) {
             console.error(`Error updating user with ID ${userId}:`, error);
-            throw error;
-        }
-    },
-
-    async deleteUser(userId: string) {
-        try {
-            const response = await axiosInstance.delete(`${ROUTE_PREFIX}/${userId}`);
-
-            const { data: resUserId, success, error } = z.string().safeParse(response.data);
-
-            if (!success) {
-                console.error(`Not valid response for deleting user with ID ${userId}:`, error);
-            }
-
-            return resUserId;
-        } catch (error) {
-            console.error(`Error deleting user with ID ${userId}:`, error);
             throw error;
         }
     },
