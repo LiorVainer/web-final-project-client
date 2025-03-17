@@ -6,6 +6,7 @@ import { Input } from 'antd';
 import { useChat } from '@hooks/useChat.hooks.ts';
 import moment from 'moment';
 import { ChatMessage } from '@/models/chat.model.ts';
+import { formatMessageDate } from '@/utils/date.utils.ts';
 
 export interface LiveChatModalProps {
     matchExperienceId: string;
@@ -50,16 +51,6 @@ export const LiveChatModal = ({
         }
     };
 
-    const formatMessageDate = useCallback((date: Date | undefined) => {
-        const messageDate = moment(date);
-        const today = moment().startOf('day');
-        const yesterday = moment().subtract(1, 'days').startOf('day');
-
-        if (messageDate.isSame(today, 'day')) return 'Today';
-        if (messageDate.isSame(yesterday, 'day')) return 'Yesterday';
-        return messageDate.format('MMMM D, YYYY');
-    }, []);
-
     const shouldShowDateSeparator = useCallback(
         (index: number) => {
             if (index === 0) return true;
@@ -67,7 +58,7 @@ export const LiveChatModal = ({
             const previousDate = formatMessageDate(messages?.at(index - 1)?.createdAt);
             return currentDate !== previousDate;
         },
-        [messages, formatMessageDate]
+        [messages]
     );
 
     const renderMessage = useCallback(
@@ -89,7 +80,7 @@ export const LiveChatModal = ({
                 </div>
             );
         },
-        [visitorId, shouldShowDateSeparator, formatMessageDate]
+        [visitorId, shouldShowDateSeparator]
     );
 
     return (
