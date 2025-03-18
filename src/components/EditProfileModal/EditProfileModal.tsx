@@ -1,4 +1,4 @@
-import { Avatar, Button, Form, Input, Modal, Typography, Upload } from 'antd';
+import { Avatar, Button, Form, Input, Modal, Upload } from 'antd';
 import classes from './edit-profile-modal.module.scss';
 import { UploadOutlined, UserOutlined } from '@ant-design/icons';
 import { UpdateUserValidationRules } from '@/pages/AuthPage/auth.validation';
@@ -20,17 +20,16 @@ export interface EditProfileModalProps {
 
 export interface RegistrationFormValues {
     username: string;
-    email: string;
     password: string;
     picture: string;
 }
 
 export const EditProfileModal = ({ isOpen, handleCancel }: EditProfileModalProps) => {
-    const { loggedInUser, doesUserHasGooglePicture, isGoogleUser } = useAuth();
+    const { loggedInUser, doesUserHasGooglePicture } = useAuth();
 
     const [imageUrl, setImageUrl] = useState<string>('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [_errorMessage, setErrorMessage] = useState<string | null>(null);
     const queryClient = useQueryClient();
 
     const [form] = Form.useForm();
@@ -41,7 +40,6 @@ export const EditProfileModal = ({ isOpen, handleCancel }: EditProfileModalProps
         try {
             if (loggedInUser) {
                 const isPictureChanged = values.picture !== loggedInUser.picture;
-                const isEmailChanged = values.email !== loggedInUser.email;
                 const isUsernameChanged = values.username !== loggedInUser.username;
 
                 if (selectedFile) {
@@ -53,7 +51,6 @@ export const EditProfileModal = ({ isOpen, handleCancel }: EditProfileModalProps
 
                 const user: UserUpdatePayload = {
                     username: isUsernameChanged ? values.username : undefined,
-                    email: isEmailChanged ? values.email : undefined,
                     picture: uploadedImageUrl,
                 };
 
@@ -132,16 +129,6 @@ export const EditProfileModal = ({ isOpen, handleCancel }: EditProfileModalProps
                     >
                         <Input placeholder="Enter your username" />
                     </Form.Item>
-                    {!isGoogleUser && (
-                        <Form.Item
-                            label="Email"
-                            name="email"
-                            className={classes.inputField}
-                            rules={UpdateUserValidationRules.email}
-                        >
-                            <Input placeholder="Enter your email" />
-                        </Form.Item>
-                    )}
                 </Form>
             </Modal>
         )

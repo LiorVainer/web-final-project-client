@@ -141,7 +141,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
         setValue('awayTeam', '');
         setSelectedLeagueId(undefined);
         resetTeams();
-        trigger('country');
+        void trigger('country');
     };
 
     const resetValuesOnLeagueChange = (value: string, id: number | undefined) => {
@@ -150,7 +150,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
         setValue('homeTeam', '');
         setValue('awayTeam', '');
         resetTeams();
-        trigger('league');
+        void trigger('league');
     };
 
     const resetValuesOnChange = (key: keyof MatchExperienceFormValues, value: string) => {
@@ -191,7 +191,6 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
                 await MatchExperienceService.createMatchExperience({
                     ...valuesWithConvertedDate,
                     picture: uploadedImageUrl,
-                    createdBy: '123412341234123412341234',
                 });
 
                 message.success('Match Experience Shared successfully');
