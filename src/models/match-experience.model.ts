@@ -29,8 +29,8 @@ export const CreateMatchExperienceSchema = MatchExperiencePayloadSchema.omit({ _
 });
 
 export const PaginatedMatchExperiencesSchema = z.object({
-    experiences: z.array(MatchExperienceSchema), // Array of match experiences
-    totalPages: z.number(), // Total number of pages in pagination
+    experiences: z.array(MatchExperienceSchema), 
+    totalPages: z.number(), 
 });
 
 export type Comment = z.infer<typeof CommentSchema>;

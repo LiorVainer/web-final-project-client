@@ -13,14 +13,14 @@ import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import moment from 'moment';
 import { Heart, MessageCircle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes.const';
-import { useNavigate } from 'react-router-dom'; // ✅ Import for navigation
+import { useNavigate } from 'react-router-dom'; 
 
 export interface MatchExperiencesCatalogScreenProps {
     mode: 'all' | 'my';
 }
 
-const currentUserId = '67d592743f1f3c317f54c7de'; // creator
-const PageItemsLimit = 5; // Number of items per page
+const currentUserId = '67d592743f1f3c317f54c7de'; 
+const PageItemsLimit = 5; 
 
 export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogScreenProps) => {
     const [page, setPage] = useState(1);
@@ -125,7 +125,6 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
                         Previous
                     </Button>
                     <span>
-                        {' '}
                         Page {page} of {totalPages}{' '}
                     </span>
                     <Button

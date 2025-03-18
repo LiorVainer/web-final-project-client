@@ -16,9 +16,6 @@ export const Navbar = () => {
             <div className={classes.right}>
                 <div className={classes.navLinks}>
                     <Link to="/my-experiences">My Experiences</Link>
-                    {/* <Link to="/history">History</Link>
-                    <Link to="/saved">Saved</Link>
-                    <Link to="/settings">Settings</Link> */}
                 </div> 
 
                 <Link to={'/'} className={classes.userProfile}>
