@@ -40,7 +40,6 @@ const handleTokenRefresh = async (error: AxiosError) => {
         const refreshToken = AuthStorageService.getRefreshToken();
         if (!refreshToken) {
             AuthStorageService.clearTokens();
-            window.location.href = ROUTES.AUTH;
             return Promise.reject(error);
         }
 

@@ -7,13 +7,22 @@ export interface MatchDetailsProps {
     matchExperience: MatchExperience;
 }
 
+const MAX_TEAM_NAME_LENGTH = 14;
+const displayTeamName = (teamName: string) => {
+    if (teamName.length > MAX_TEAM_NAME_LENGTH) {
+        return `${teamName.slice(0, MAX_TEAM_NAME_LENGTH)}...`;
+    } else {
+        return teamName;
+    }
+};
+
 export const MatchDetails = ({ matchExperience }: MatchDetailsProps) => {
     return (
         <div className={classes.matchDetails}>
             <div className={classes.teams}>
-                <span>{matchExperience.homeTeam}</span>
+                <span>{displayTeamName(matchExperience.homeTeam)}</span>
                 <span>vs</span>
-                <span>{matchExperience.awayTeam}</span>
+                <span>{displayTeamName(matchExperience.awayTeam)}</span>
             </div>
             <div className={classes.matchMeta}>
                 <div>
