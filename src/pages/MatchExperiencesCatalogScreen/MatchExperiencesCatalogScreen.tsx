@@ -14,6 +14,7 @@ import moment from 'moment';
 import { Heart, MessageCircle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes.const';
 import { useNavigate } from 'react-router-dom'; 
+import { QUERY_KEYS } from '@/api/constants/query-keys.const';
 
 export interface MatchExperiencesCatalogScreenProps {
     mode: 'all' | 'my';
@@ -35,7 +36,7 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
         refetch,
     } = useQuery({
         queryKey:
-            mode === 'all' ? ['matchExperiences', page, sortBy] : ['userMatchExperiences', page, sortBy, currentUserId],
+            mode === 'all' ? [QUERY_KEYS.MATCH_EXPERNIENCES , page, sortBy] : [QUERY_KEYS.USER_MATCH_EXPERNIENCES, page, sortBy, currentUserId],
         queryFn: () =>
             mode === 'all'
                 ? MatchExperienceService.getAllMatchExperience(page, PageItemsLimit, sortBy)
