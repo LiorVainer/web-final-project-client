@@ -24,9 +24,7 @@ export const MatchExperienceSchema = MatchExperiencePayloadSchema.extend({
     comments: z.array(CommentWithIdSchema),
 });
 
-export const CreateMatchExperienceSchema = MatchExperiencePayloadSchema.omit({ _id: true, likes: true }).extend({
-    createdBy: z.string(),
-});
+export const CreateMatchExperienceSchema = MatchExperiencePayloadSchema.omit({ _id: true, likes: true });
 
 export type Comment = z.infer<typeof CommentSchema>;
 export type MatchExperience = z.infer<typeof MatchExperienceSchema>;
