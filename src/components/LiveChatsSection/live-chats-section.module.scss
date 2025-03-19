@@ -13,6 +13,13 @@
   gap: 1rem;
 }
 
+.chatUserInage {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 .chatItem {
   display: flex;
   flex-direction: column;

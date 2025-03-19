@@ -5,17 +5,19 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Screen } from '@components/Screen';
 import { LiveChatModal } from '@components/LiveChatModal';
-import { Alert, Spin } from 'antd';
+import { Alert } from 'antd';
 import moment from 'moment';
 import { MatchDetails } from '@components/MatchDetails';
 import { UserInfo } from '@components/UserInfo';
 import { CommentsSection } from '@components/CommentsSection';
 import { MatchExperienceActions } from '@components/MatchExperienceActions';
 import { LiveChatsSection } from '@components/LiveChatsSection';
-import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 import { XCircle } from 'lucide-react';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import { areDatesInSameHour } from '@/utils/date.utils.ts';
+import { LoadingContainer } from '@components/LoadingContainer';
+import { useAuth } from '@/context/AuthContext.tsx';
 
 export interface MatchExperienceDetailsScreenProps {}
 
@@ -23,12 +25,10 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     const { id: matchExperienceId } = useParams();
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [selectedChat, setSelectedChat] = useState<{ visitorId: string } | null>(null);
+    const { loggedInUser } = useAuth();
+    if (!loggedInUser) return null;
 
     if (!matchExperienceId) return null;
-
-    // TODO: Get current user id from auth context
-    // const currentUserId = '67cc3e3edc7cc58c42357e07'; // visitor
-    const currentUserId = '67d58b363f1f3c317f54c7c3'; // creator
 
     const {
         data: matchExperience,
@@ -40,7 +40,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
         enabled: !!matchExperienceId,
     });
 
-    const isCreator = useMemo(() => matchExperience?.user._id === currentUserId, [matchExperience, currentUserId]);
+    const isCreator = useMemo(() => matchExperience?.user._id === loggedInUser?._id, [matchExperience, loggedInUser]);
 
     const openChat = (visitorId: string) => {
         setSelectedChat({ visitorId });
@@ -48,12 +48,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     };
 
     if (isLoading) {
-        return (
-            <Screen className={classes.loadingContainer}>
-                <Spin className={classes.spinner} size="large" />
-                <h4 className={classes.loadingText}>Fetching match experience...</h4>
-            </Screen>
-        );
+        return <LoadingContainer loadingText={'Fetching match experience...'} />;
     }
 
     if (error || !matchExperience) {
@@ -76,7 +71,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                 <div className={classes.content}>
                     {matchExperience.picture && (
                         <img
-                            src={getPictureFullUrl(matchExperience.picture)}
+                            src={getPictureSrcUrl(matchExperience.picture)}
                             alt={matchExperience.title}
                             className={classes.image}
                         />
@@ -88,10 +83,9 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                                 matchExperienceId={matchExperienceId}
                                 likes={matchExperience.likes}
                                 isCreator={isCreator}
-                                currentUserId={currentUserId}
                                 liveChat={{
                                     isOpen: isChatOpen,
-                                    onClick: () => openChat(currentUserId),
+                                    onClick: () => openChat(loggedInUser?._id),
                                 }}
                             />
                         </div>
@@ -122,13 +116,12 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                         onClose={() => setIsChatOpen(false)}
                         matchExperienceId={matchExperienceId}
                         creatorId={matchExperience.user._id}
-                        loggedInUserId={currentUserId}
                         visitorId={selectedChat.visitorId}
                     />
                 )}
             </div>
 
-            <CommentsSection matchExperienceId={matchExperienceId} loggedInUserId={currentUserId} />
+            <CommentsSection matchExperienceId={matchExperienceId} />
 
             {isCreator && <LiveChatsSection matchExperienceId={matchExperienceId} onChatClick={openChat} />}
         </Screen>

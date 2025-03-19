@@ -8,14 +8,14 @@ import { useState } from 'react';
 import { MatchExperienceService } from '@api/services/match-experience.service.ts';
 import clsx from 'clsx';
 import { Loader, Send } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { getPictureSrcUrl } from '../../utils/picture.utils';
 
-// TODO - remove prop drilling of loggedInUserId and use auth context instead
 export interface CommentsSectionProps {
     matchExperienceId: string;
-    loggedInUserId: string;
 }
 
-export const CommentsSection = ({ matchExperienceId, loggedInUserId }: CommentsSectionProps) => {
+export const CommentsSection = ({ matchExperienceId }: CommentsSectionProps) => {
     const {
         data: matchExperience,
         isLoading,
@@ -23,6 +23,10 @@ export const CommentsSection = ({ matchExperienceId, loggedInUserId }: CommentsS
     } = useQuery<MatchExperience>({
         queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId],
     });
+
+    const { loggedInUser } = useAuth();
+
+    if (!loggedInUser) return null;
 
     if (isLoading) {
         return <Spin />;
@@ -32,8 +36,6 @@ export const CommentsSection = ({ matchExperienceId, loggedInUserId }: CommentsS
         return <div>Error loading comments</div>;
     }
 
-    // TODO: replace with user actual img from server
-
     return (
         <div className={classes.commentsSection}>
             <h3 className={classes.commentsTitle}>Comments</h3>
@@ -41,7 +43,7 @@ export const CommentsSection = ({ matchExperienceId, loggedInUserId }: CommentsS
             <div className={classes.commentsList}>
                 {matchExperience.comments.map((comment) => (
                     <div key={comment._id} className={classes.commentItem}>
-                        <div className={classes.commentAvatar} />
+                        <img className={classes.commentAvatar} src={getPictureSrcUrl(loggedInUser.picture)} />
                         <div className={classes.commentContent}>
                             <div className={classes.commentHeader}>
                                 <p className={classes.commentUser}>{comment.user.username}</p>
@@ -56,20 +58,24 @@ export const CommentsSection = ({ matchExperienceId, loggedInUserId }: CommentsS
                 ))}
             </div>
 
-            <NewCommentInput matchExperienceId={matchExperience._id} loggedInUserId={loggedInUserId} />
+            <NewCommentInput matchExperienceId={matchExperience._id} />
         </div>
     );
 };
 
-// TODO - remove prop drilling of loggedInUserId and use auth context instead
 interface NewCommentInputProps {
     matchExperienceId: string;
-    loggedInUserId: string;
 }
 
-const NewCommentInput = ({ matchExperienceId, loggedInUserId }: NewCommentInputProps) => {
+const NewCommentInput = ({ matchExperienceId }: NewCommentInputProps) => {
     const queryClient = useQueryClient();
     const [newComment, setNewComment] = useState('');
+    const { loggedInUser } = useAuth();
+
+    if (!loggedInUser) return null;
+
+    const loggedInUserId = loggedInUser._id;
+
     const commentMutation = useMutation({
         mutationFn: (comment: string) => MatchExperienceService.addComment(matchExperienceId, comment, loggedInUserId),
         onSuccess: () => {
@@ -86,7 +92,7 @@ const NewCommentInput = ({ matchExperienceId, loggedInUserId }: NewCommentInputP
 
     return (
         <div onSubmit={handleAddComment} className={classes.commentForm}>
-            <div className={classes.commentAvatar} />
+            <img className={classes.commentAvatar} src={getPictureSrcUrl(loggedInUser.picture)} />
             <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}

@@ -3,7 +3,7 @@ import moment from 'moment/moment';
 import { useQuery } from '@tanstack/react-query';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import { ChatService } from '@api/services/chat.service.ts';
-import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 
 export interface LiveChatsSectionProps {
     matchExperienceId: string;
@@ -30,7 +30,7 @@ export const LiveChatsSection = ({ matchExperienceId, onChatClick }: LiveChatsSe
                                 <div className={classes.chatUserInfo}>
                                     <img
                                         className={classes.chatUserInage}
-                                        src={getPictureFullUrl(chat.visitor.picture)}
+                                        src={getPictureSrcUrl(chat.visitor.picture)}
                                     />
                                     <p className={classes.chatUser}>{chat.visitor.username}</p>
                                 </div>

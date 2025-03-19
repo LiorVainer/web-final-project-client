@@ -1,11 +1,18 @@
+import { useState } from 'react';
 import classes from './navbar.module.scss';
 import { Link } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFutbol } from '@fortawesome/free-solid-svg-icons';
 
-export interface NavbarProps {}
+import { EditProfileModal } from '../EditProfileModal';
+import { NavbarUserDropdown } from '../NavbarUserDropdown';
 
 export const Navbar = () => {
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    const showModal = () => setIsModalOpen(true);
+    const handleCancel = () => setIsModalOpen(false);
+
     return (
         <nav className={classes.navbar}>
             <Link to={'/'} className={classes.brand}>
@@ -14,13 +21,8 @@ export const Navbar = () => {
             </Link>
 
             <div className={classes.right}>
-                <div className={classes.navLinks}>
-                    <Link to="/my-experiences">My Experiences</Link>
-                </div> 
-
-                <Link to={'/'} className={classes.userProfile}>
-                    <img src="https://picsum.photos/40/40" alt="User Avatar" className={classes.avatar} />
-                </Link>
+                <NavbarUserDropdown showModal={showModal} />
+                <EditProfileModal isOpen={isModalOpen} handleCancel={handleCancel} />
             </div>
         </nav>
     );

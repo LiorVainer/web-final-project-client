@@ -11,10 +11,10 @@ import { FileService } from '@/api/services/file.service';
 import { useQueryOnDefinedParam } from '@api/hooks/service.query.ts';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { getPictureFullUrl } from '@/utils/picture.utils.ts';
 import { MatchExperience } from '@/models/match-experience.model.ts';
 import { calculateCurrentSeason } from '@/utils/date.utils.ts';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
+import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 
 const MatchExperienceFormValuesSchema = z.object({
     title: z.string().min(3, 'Title is too short').nonempty('Title is required'),
@@ -23,7 +23,7 @@ const MatchExperienceFormValuesSchema = z.object({
     country: z.string().nonempty('Country is required'),
     stadium: z.string().nonempty('Stadium is required'),
     league: z.string().nonempty('League is required'),
-    leaugeId: z.number().optional(),
+    leagueId: z.number().optional(),
     homeTeam: z.string().nonempty('Home Team is required'),
     awayTeam: z.string().nonempty('Away Team is required'),
     matchDate: z.preprocess(
@@ -141,7 +141,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
         setValue('awayTeam', '');
         setSelectedLeagueId(undefined);
         resetTeams();
-        trigger('country');
+        void trigger('country');
     };
 
     const resetValuesOnLeagueChange = (value: string, id: number | undefined) => {
@@ -150,7 +150,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
         setValue('homeTeam', '');
         setValue('awayTeam', '');
         resetTeams();
-        trigger('league');
+        void trigger('league');
     };
 
     const resetValuesOnChange = (key: keyof MatchExperienceFormValues, value: string) => {
@@ -177,7 +177,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
             if (existingMatchExperience) {
                 existingMatchExperience.picture &&
                     uploadedImageUrl &&
-                    (await FileService.handleDelete(existingMatchExperience.picture));
+                    (await FileService.deleteFile(existingMatchExperience.picture));
 
                 await MatchExperienceService.updateMatchExperience(existingMatchExperience._id, {
                     ...valuesWithConvertedDate,
@@ -191,7 +191,6 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
                 await MatchExperienceService.createMatchExperience({
                     ...valuesWithConvertedDate,
                     picture: uploadedImageUrl,
-                    createdBy: '67d58b363f1f3c317f54c7c3',
                 });
 
                 message.success('Match Experience Shared successfully');
@@ -385,7 +384,7 @@ export const ShareMatchExperienceModal = ({ onClose, existingMatchExperience }: 
                                 imageUrl
                                     ? imageUrl
                                     : existingMatchExperience?.picture &&
-                                      getPictureFullUrl(existingMatchExperience.picture)
+                                      getPictureSrcUrl(existingMatchExperience.picture)
                             }
                             alt="Uploaded Preview"
                             className={styles.imagePreview}

@@ -7,23 +7,22 @@ import { useChat } from '@hooks/useChat.hooks.ts';
 import moment from 'moment';
 import { ChatMessage } from '@/models/chat.model.ts';
 import { formatMessageDate } from '@/utils/date.utils.ts';
+import { useAuth } from '../../context/AuthContext';
+import { getPictureSrcUrl } from '../../utils/picture.utils';
 
 export interface LiveChatModalProps {
     matchExperienceId: string;
     visitorId: string;
     creatorId: string;
-    loggedInUserId: string;
     onClose: () => void;
 }
 
-export const LiveChatModal = ({
-    matchExperienceId,
-    visitorId,
-    creatorId,
-    loggedInUserId,
-    onClose,
-}: LiveChatModalProps) => {
+export const LiveChatModal = ({ matchExperienceId, visitorId, creatorId, onClose }: LiveChatModalProps) => {
     const [newMessage, setNewMessage] = useState('');
+    const { loggedInUser } = useAuth();
+    if (!loggedInUser) return null;
+
+    const loggedInUserId = loggedInUser?._id;
     const { messages, sendMessage, visitor, matchExperienceCreator, onlineUsers } = useChat({
         matchExperienceId,
         visitorId,
@@ -88,7 +87,11 @@ export const LiveChatModal = ({
             <div className={classes.chatHeader}>
                 <div className={classes.userInfo}>
                     <img
-                        src={visitorId === loggedInUserId ? matchExperienceCreator?.picture : visitor?.picture}
+                        src={
+                            visitorId === loggedInUserId && matchExperienceCreator
+                                ? getPictureSrcUrl(matchExperienceCreator?.picture)
+                                : visitor && getPictureSrcUrl(visitor?.picture)
+                        }
                         alt="User"
                         className={classes.userAvatar}
                     />

@@ -3,6 +3,7 @@ import { MatchExperienceDetailsScreen } from '@pages/MatchExperienceDetailsScree
 import { MatchExperiencesCatalogScreen } from 'src/pages/MatchExperiencesCatalogScreen';
 import { Layout } from '@/layout/Layout';
 import { ROUTES } from '@/constants/routes.const';
+import { AuthPage } from '@/pages/AuthPage';
 
 export interface RouterProps {}
 
@@ -16,6 +17,7 @@ export const Router = (_props: RouterProps) => {
 
                 <Route path={ROUTES.MY_EXPERIENCES} element={<MatchExperiencesCatalogScreen mode="my" />} />
                 <Route path="/" element={<MatchExperiencesCatalogScreen mode="all" />} />
+                <Route path={ROUTES.AUTH} element={<AuthPage />} />
             </Route>
         </Routes>
     );

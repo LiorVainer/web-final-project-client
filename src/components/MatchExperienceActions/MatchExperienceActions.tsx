@@ -8,13 +8,12 @@ import classes from './match-experience-actions.module.scss';
 import { ShareMatchExperienceModal } from '@components/ShareMatchExperienceModal';
 import { MatchExperience } from '@/models/match-experience.model.ts';
 import { DeleteMatchExperienceModal } from '@components/DeleteMatchExperienceModal';
+import { useAuth } from '../../context/AuthContext';
 
-// TODO - remove prop drilling of likes and use auth context instead
 interface MatchExperienceActionsProps {
     matchExperienceId: string;
     likes: string[];
     isCreator: boolean;
-    currentUserId: string;
     liveChat: {
         isOpen: boolean;
         onClick: () => void;
@@ -26,11 +25,15 @@ export const MatchExperienceActions = ({
     liveChat,
     likes,
     isCreator,
-    currentUserId,
 }: MatchExperienceActionsProps) => {
     const queryClient = useQueryClient();
     const [isEditMatchExperienceModalOpen, setIsEditMatchExperienceModalOpen] = useState(false);
     const [deleteMatchExperienceModalOpen, setDeleteMatchExperienceModalOpen] = useState(false);
+    const { loggedInUser } = useAuth();
+
+    if (!loggedInUser) return null;
+
+    const currentUserId = loggedInUser._id;
 
     const { mutate: likeMutate, isPending: isLikePending } = useMutation({
         mutationFn: () => MatchExperienceService.likeMatchExperience(matchExperienceId, currentUserId),
