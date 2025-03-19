@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { User } from '@/models/user.model.ts';
 import { axiosInstance } from '../config/axios-instance';
 import {
     CreateMatchExperienceBody,

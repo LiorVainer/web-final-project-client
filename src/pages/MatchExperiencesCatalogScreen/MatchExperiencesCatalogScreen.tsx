@@ -9,7 +9,7 @@ import { MatchExperienceService } from '@/api/services/match-experience.service'
 import { MatchDetails } from '@components/MatchDetails';
 import { Screen } from '@components/Screen';
 import { useQuery } from '@tanstack/react-query';
-import { getPictureFullUrl } from '@/utils/picture.utils.ts';
+import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 import moment from 'moment';
 import { Heart, MessageCircle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes.const';
@@ -36,7 +36,7 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
         refetch,
     } = useQuery({
         queryKey:
-            mode === 'all' ? [QUERY_KEYS.MATCH_EXPERNIENCES , page, sortBy] : [QUERY_KEYS.USER_MATCH_EXPERNIENCES, page, sortBy, currentUserId],
+            mode === 'all' ? [QUERY_KEYS.MATCH_EXPERIENCES , page, sortBy] : [QUERY_KEYS.USER_MATCH_EXPERIENCES, page, sortBy, currentUserId],
         queryFn: () =>
             mode === 'all'
                 ? MatchExperienceService.getAllMatchExperience(page, PageItemsLimit, sortBy)
@@ -87,7 +87,7 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
                                         <div>
                                             {matchExperience.picture && (
                                                 <img
-                                                    src={getPictureFullUrl(matchExperience.picture)}
+                                                    src={getPictureSrcUrl(matchExperience.picture)}
                                                     alt={matchExperience.title}
                                                     className={classes.image}
                                                 />
