@@ -28,7 +28,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
 
     // TODO: Get current user id from auth context
     // const currentUserId = '67cc3e3edc7cc58c42357e07'; // visitor
-    const currentUserId = '67d5ba8eb00eec160cdbd0ef'; // creator
+    const currentUserId = '67d58b363f1f3c317f54c7c3'; // creator
 
     const {
         data: matchExperience,

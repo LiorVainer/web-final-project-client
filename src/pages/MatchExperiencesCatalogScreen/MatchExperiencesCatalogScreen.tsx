@@ -19,7 +19,7 @@ export interface MatchExperiencesCatalogScreenProps {
     mode: 'all' | 'my';
 }
 
-const currentUserId = '67d592743f1f3c317f54c7de'; 
+const currentUserId = '67d58b363f1f3c317f54c7c3'; 
 const PageItemsLimit = 5; 
 
 export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogScreenProps) => {
@@ -56,7 +56,7 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
         <Screen className={classes.container}>
             <div className={classes.content}>
                 <div className={classes.header}>
-                    <h1>Home Screen</h1>
+                    <h1>{mode === 'all'  ?  "Home Screen" :  "My Experiences"}</h1>
 
                     <Select
                         value={sortBy}
