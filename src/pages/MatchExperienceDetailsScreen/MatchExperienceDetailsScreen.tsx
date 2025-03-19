@@ -26,17 +26,13 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [selectedChat, setSelectedChat] = useState<{ visitorId: string } | null>(null);
     const { loggedInUser } = useAuth();
-    if (!loggedInUser) return null;
-
-    if (!matchExperienceId) return null;
-
     const {
         data: matchExperience,
         isLoading,
         error,
     } = useQuery({
         queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId],
-        queryFn: () => MatchExperienceService.getMatchExperienceById(matchExperienceId),
+        queryFn: () => MatchExperienceService.getMatchExperienceById(matchExperienceId!),
         enabled: !!matchExperienceId,
     });
 
@@ -51,7 +47,7 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
         return <LoadingContainer loadingText={'Fetching match experience...'} />;
     }
 
-    if (error || !matchExperience) {
+    if (error && !matchExperience) {
         return (
             <Screen className={classes.errorContainer}>
                 <XCircle size={50} className={classes.errorIcon} />
@@ -65,11 +61,15 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
         );
     }
 
+    if (!matchExperienceId) return null;
+    if (!matchExperience) return null;
+    if (!loggedInUser) return null;
+
     return (
         <Screen className={classes.container}>
             <div className={classes.card}>
                 <div className={classes.content}>
-                    {matchExperience.picture && (
+                    {matchExperience?.picture && (
                         <img
                             src={getPictureSrcUrl(matchExperience.picture)}
                             alt={matchExperience.title}

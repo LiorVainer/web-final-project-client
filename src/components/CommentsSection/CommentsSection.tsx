@@ -26,8 +26,6 @@ export const CommentsSection = ({ matchExperienceId }: CommentsSectionProps) => 
 
     const { loggedInUser } = useAuth();
 
-    if (!loggedInUser) return null;
-
     if (isLoading) {
         return <Spin />;
     }
@@ -35,6 +33,7 @@ export const CommentsSection = ({ matchExperienceId }: CommentsSectionProps) => 
     if (error || !matchExperience) {
         return <div>Error loading comments</div>;
     }
+    if (!loggedInUser) return null;
 
     return (
         <div className={classes.commentsSection}>
@@ -43,7 +42,11 @@ export const CommentsSection = ({ matchExperienceId }: CommentsSectionProps) => 
             <div className={classes.commentsList}>
                 {matchExperience.comments.map((comment) => (
                     <div key={comment._id} className={classes.commentItem}>
-                        <img className={classes.commentAvatar} src={getPictureSrcUrl(loggedInUser.picture)} />
+                        <img
+                            className={classes.commentAvatar}
+                            src={getPictureSrcUrl(comment.user.picture)}
+                            alt={'image'}
+                        />
                         <div className={classes.commentContent}>
                             <div className={classes.commentHeader}>
                                 <p className={classes.commentUser}>{comment.user.username}</p>

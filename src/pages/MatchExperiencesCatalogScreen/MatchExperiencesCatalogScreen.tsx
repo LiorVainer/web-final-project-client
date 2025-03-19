@@ -13,15 +13,15 @@ import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 import moment from 'moment';
 import { Heart, MessageCircle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes.const';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import { QUERY_KEYS } from '@/api/constants/query-keys.const';
 
 export interface MatchExperiencesCatalogScreenProps {
     mode: 'all' | 'my';
 }
 
-const currentUserId = '67d58b363f1f3c317f54c7c3'; 
-const PageItemsLimit = 5; 
+const currentUserId = '67d58b363f1f3c317f54c7c3';
+const PageItemsLimit = 5;
 
 export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogScreenProps) => {
     const [page, setPage] = useState(1);
@@ -36,7 +36,9 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
         refetch,
     } = useQuery({
         queryKey:
-            mode === 'all' ? [QUERY_KEYS.MATCH_EXPERIENCES , page, sortBy] : [QUERY_KEYS.USER_MATCH_EXPERIENCES, page, sortBy, currentUserId],
+            mode === 'all'
+                ? [QUERY_KEYS.MATCH_EXPERIENCES, page, sortBy]
+                : [QUERY_KEYS.USER_MATCH_EXPERIENCES, page, sortBy, currentUserId],
         queryFn: () =>
             mode === 'all'
                 ? MatchExperienceService.getAllMatchExperience(page, PageItemsLimit, sortBy)
@@ -57,7 +59,7 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
         <Screen className={classes.container}>
             <div className={classes.content}>
                 <div className={classes.header}>
-                    <h1>{mode === 'all'  ?  "Home Screen" :  "My Experiences"}</h1>
+                    <h1>{mode === 'all' ? 'Home Screen' : 'My Experiences'}</h1>
 
                     <Select
                         value={sortBy}
@@ -80,32 +82,33 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
                             {matchExperiences?.length ? (
                                 matchExperiences.map((matchExperience) => (
                                     <div
-                                        className={classes.matchCard}
-                                        key={matchExperience._id}
+                                        className={classes.matchCardContainer}
                                         onClick={() => navigate(`${ROUTES.MATCH_EXPERIENCE}/${matchExperience._id}`)}
                                     >
-                                        <div>
-                                            {matchExperience.picture && (
-                                                <img
-                                                    src={getPictureSrcUrl(matchExperience.picture)}
-                                                    alt={matchExperience.title}
-                                                    className={classes.image}
-                                                />
-                                            )}
-                                        </div>
-                                        <div className={classes.test}>
-                                            <MatchDetails matchExperience={matchExperience} />
-                                            <div className={classes.rightSide}>
-                                                <p className={classes.contentTime}>
-                                                    posted {moment(matchExperience.createdAt).fromNow()}
-                                                </p>
-                                                <div className={classes.likes}>
-                                                    <div>{matchExperience.likes.length} likes</div>
-                                                    <Heart size={15} />
-                                                </div>
-                                                <div className={classes.comments}>
-                                                    <div>{matchExperience.comments.length} comments</div>
-                                                    <MessageCircle size={15} />
+                                        {matchExperience.picture && (
+                                            <img
+                                                src={getPictureSrcUrl(matchExperience.picture)}
+                                                alt={matchExperience.title}
+                                                className={classes.image}
+                                            />
+                                        )}
+                                        <div className={classes.matchCardDetails} key={matchExperience._id}>
+                                            <div className={classes.test}>
+                                                <MatchDetails matchExperience={matchExperience} />
+                                                <div className={classes.rightSide}>
+                                                    <p className={classes.contentTime}>
+                                                        posted {moment(matchExperience.createdAt).fromNow()}
+                                                    </p>
+                                                    <div className={classes.userInteraction}>
+                                                        <div className={classes.likes}>
+                                                            <div>{matchExperience.likes.length} likes</div>
+                                                            <Heart size={15} />
+                                                        </div>
+                                                        <div className={classes.comments}>
+                                                            <div>{matchExperience.comments.length} comments</div>
+                                                            <MessageCircle size={15} />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
