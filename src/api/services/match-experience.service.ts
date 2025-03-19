@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { User } from '@/models/user.model.ts';
 import { axiosInstance } from '../config/axios-instance';
 import {
     CreateMatchExperienceBody,
     MatchExperience,
     MatchExperiencePayloadSchema,
     MatchExperienceSchema,
+    PaginatedMatchExperiencesSchema,
 } from '@/models/match-experience.model';
 import { ROUTES } from '@/constants/routes.const';
 import { OkResponseSchema } from '@/models/response.model.ts';
@@ -13,23 +13,38 @@ import { OkResponseSchema } from '@/models/response.model.ts';
 export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCE;
 
 export const MatchExperienceService = {
-    async getAllMatchExperience() {
+    async getAllMatchExperience(page = 1, limit = 5, sortBy = "date") {
         try {
-            const response = await axiosInstance.get<User[]>(ROUTE_PREFIX);
-
-            const {
-                data: matchExperiences,
-                success,
-                error,
-            } = MatchExperiencePayloadSchema.array().safeParse(response.data);
-
+            const response = await axiosInstance.get(ROUTE_PREFIX, {
+                params: { page, limit, sortBy },
+            });
+    
+            const { data, success, error } = PaginatedMatchExperiencesSchema.safeParse(response.data);
             if (!success) {
-                console.error('Not valid response for fetching matchExperience:', error);
+                console.error("Invalid response format for paginated match experiences:", error);
+            }
+    
+            return data;
+        } catch (error) {
+            console.error("Error fetching matchExperience:", error);
+            throw error;
+        }
+    },
+
+    async getAllMatchExperiencesByUserId(userId: string, page = 1, limit = 5, sortBy = "date") {
+        try {
+            const response = await axiosInstance.get(`${ROUTE_PREFIX}/user/${userId}`, {
+                params: { page, limit, sortBy },
+            });
+
+            const { data, success, error } = PaginatedMatchExperiencesSchema.safeParse(response.data);
+            if (!success) {
+                console.error(`Invalid response format for user ${userId} match experiences:`, error);
             }
 
-            return matchExperiences;
+            return data;
         } catch (error) {
-            console.error('Error fetching matchExperience:', error);
+            console.error(`Error fetching match experiences for user ${userId}:`, error);
             throw error;
         }
     },

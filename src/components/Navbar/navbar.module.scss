@@ -68,7 +68,15 @@ $link-hover-color: #000;
 }
 
 .headerLeft {
-    display: flex;
-    align-items: center;
-    gap: 4rem;
+  display: flex;
+  align-items: center;
+  gap: 4rem;
 }
+
+.right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
