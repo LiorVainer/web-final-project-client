@@ -13,25 +13,25 @@ import { OkResponseSchema } from '@/models/response.model.ts';
 export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCE;
 
 export const MatchExperienceService = {
-    async getAllMatchExperience(page = 1, limit = 5, sortBy = "date") {
+    async getAllMatchExperience(page = 1, limit = 5, sortBy = 'date') {
         try {
             const response = await axiosInstance.get(ROUTE_PREFIX, {
                 params: { page, limit, sortBy },
             });
-    
+
             const { data, success, error } = PaginatedMatchExperiencesSchema.safeParse(response.data);
             if (!success) {
-                console.error("Invalid response format for paginated match experiences:", error);
+                console.error('Invalid response format for paginated match experiences:', error);
             }
-    
+
             return data;
         } catch (error) {
-            console.error("Error fetching matchExperience:", error);
+            console.error('Error fetching matchExperience:', error);
             throw error;
         }
     },
 
-    async getAllMatchExperiencesByUserId(userId: string, page = 1, limit = 5, sortBy = "date") {
+    async getAllMatchExperiencesByUserId(userId: string, page = 1, limit = 5, sortBy = 'date') {
         try {
             const response = await axiosInstance.get(`${ROUTE_PREFIX}/user/${userId}`, {
                 params: { page, limit, sortBy },
@@ -117,11 +117,9 @@ export const MatchExperienceService = {
         }
     },
 
-    async likeMatchExperience(matchExpId: string, userId: string) {
+    async likeMatchExperience(matchExpId: string) {
         try {
-            const response = await axiosInstance.post(`${ROUTE_PREFIX}/${matchExpId}/like`, {
-                userId,
-            });
+            const response = await axiosInstance.post(`${ROUTE_PREFIX}/${matchExpId}/like`);
 
             const { data, success, error } = OkResponseSchema.safeParse(response.data);
 
@@ -136,11 +134,9 @@ export const MatchExperienceService = {
         }
     },
 
-    async unlikeMatchExperience(matchExpId: string, userId: string) {
+    async unlikeMatchExperience(matchExpId: string) {
         try {
-            const response = await axiosInstance.post(`${ROUTE_PREFIX}/${matchExpId}/unlike`, {
-                userId,
-            });
+            const response = await axiosInstance.post(`${ROUTE_PREFIX}/${matchExpId}/unlike`);
 
             const { data, success, error } = OkResponseSchema.safeParse(response.data);
 
@@ -155,11 +151,10 @@ export const MatchExperienceService = {
         }
     },
 
-    async addComment(id: string, comment: string, userId: string) {
+    async addComment(id: string, comment: string) {
         try {
             const response = await axiosInstance.post(`${ROUTE_PREFIX}/${id}/comments`, {
                 content: comment,
-                userId,
             });
 
             const { data, success, error } = z.string().safeParse(response.data);

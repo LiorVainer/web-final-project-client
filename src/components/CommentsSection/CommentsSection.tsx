@@ -80,7 +80,7 @@ const NewCommentInput = ({ matchExperienceId }: NewCommentInputProps) => {
     const loggedInUserId = loggedInUser._id;
 
     const commentMutation = useMutation({
-        mutationFn: (comment: string) => MatchExperienceService.addComment(matchExperienceId, comment, loggedInUserId),
+        mutationFn: (comment: string) => MatchExperienceService.addComment(matchExperienceId, comment),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] });
             setNewComment('');
