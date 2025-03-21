@@ -36,7 +36,7 @@ export const MatchExperienceActions = ({
     const currentUserId = loggedInUser._id;
 
     const { mutate: likeMutate, isPending: isLikePending } = useMutation({
-        mutationFn: () => MatchExperienceService.likeMatchExperience(matchExperienceId, currentUserId),
+        mutationFn: () => MatchExperienceService.likeMatchExperience(matchExperienceId),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] }),
     });
 
@@ -47,7 +47,7 @@ export const MatchExperienceActions = ({
     if (!matchExperience) return null;
 
     const { mutate: unlikeMutate, isPending: isUnlikePending } = useMutation({
-        mutationFn: () => MatchExperienceService.unlikeMatchExperience(matchExperienceId, currentUserId),
+        mutationFn: () => MatchExperienceService.unlikeMatchExperience(matchExperienceId),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE, matchExperienceId] }),
     });
 
@@ -59,7 +59,7 @@ export const MatchExperienceActions = ({
         unlikeMutate();
     };
 
-    const isLiked = useMemo(() => likes.includes(currentUserId), [likes]);
+    const isLiked = useMemo(() => likes.includes(currentUserId), [likes, currentUserId]);
 
     const isLikedDisabled = useMemo(() => {
         if (isCreator) {

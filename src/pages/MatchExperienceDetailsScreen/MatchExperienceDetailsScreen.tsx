@@ -94,11 +94,6 @@ export const MatchExperienceDetailsScreen = (_props: MatchExperienceDetailsScree
                                 <div className={classes.topRow}>
                                     <p className={classes.title}>{matchExperience.title}</p>
                                     <div className={classes.timeContainer}>
-                                        {!areDatesInSameHour(matchExperience.updatedAt, matchExperience.createdAt) && (
-                                            <p className={classes.editTime}>
-                                                ( edited {moment(matchExperience.updatedAt).fromNow()} )
-                                            </p>
-                                        )}
                                         <p className={classes.contentTime}>
                                             posted {moment(matchExperience.createdAt).fromNow()}
                                         </p>
