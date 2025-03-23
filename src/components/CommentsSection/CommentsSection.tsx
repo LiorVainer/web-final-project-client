@@ -77,8 +77,6 @@ const NewCommentInput = ({ matchExperienceId }: NewCommentInputProps) => {
 
     if (!loggedInUser) return null;
 
-    const loggedInUserId = loggedInUser._id;
-
     const commentMutation = useMutation({
         mutationFn: (comment: string) => MatchExperienceService.addComment(matchExperienceId, comment),
         onSuccess: () => {
@@ -98,7 +96,7 @@ const NewCommentInput = ({ matchExperienceId }: NewCommentInputProps) => {
             <img className={classes.commentAvatar} src={getPictureSrcUrl(loggedInUser.picture)} />
             <Input
                 value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
+                onChange={(e: any) => setNewComment(e.target.value)}
                 onPressEnter={handleAddComment}
                 placeholder="Add a comment..."
                 disabled={commentMutation.isPending}

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import { MatchExperienceService } from '@api/services/match-experience.service.ts';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
 import { Button, message, Modal } from 'antd';
+import { ROUTES } from '@/constants/routes.const';
 
 interface DeleteMatchExperienceModalProps {
     matchExperienceId: string;
@@ -19,7 +20,7 @@ export const DeleteMatchExperienceModal = ({ matchExperienceId, onClose }: Delet
         mutationFn: () => MatchExperienceService.deleteMatchExperience(matchExperienceId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.MATCH_EXPERIENCE] });
-            navigate('/');
+            navigate(ROUTES.MATCH_EXPERIENCES);
             message.success('Match Experience Deleted successfully');
             onClose();
         },

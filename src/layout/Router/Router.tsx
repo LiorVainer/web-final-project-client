@@ -11,16 +11,12 @@ export interface RouterProps {}
 export const Router = (_props: RouterProps) => {
     return (
         <Routes>
-            <Route path={ROUTES.AUTH}>
-                <Route index element={<AuthPage />}></Route>
-            </Route>
-            <Route path="/" element={<Layout />}>
-                <Route element={<ProtectedRoutes />}>
-                    <Route path={ROUTES.MATCH_EXPERIENCE}>
-                        <Route path=":id" element={<MatchExperienceDetailsScreen />} />
-                        <Route index element={<MatchExperiencesCatalogScreen mode={'my'} />} />
-                    </Route>
-                    <Route path="/" element={<MatchExperiencesCatalogScreen mode={'all'} />} />
+            <Route path={ROUTES.AUTH} element={<AuthPage />} />
+            <Route element={<ProtectedRoutes />}>
+                <Route element={<Layout />}>
+                    <Route path={ROUTES.MATCH_EXPERIENCES} element={<MatchExperiencesCatalogScreen mode="all" />} />
+                    <Route path={`${ROUTES.MATCH_EXPERIENCES}/:id`} element={<MatchExperienceDetailsScreen />} />
+                    <Route path={ROUTES.MY_EXPERIENCES} element={<MatchExperiencesCatalogScreen mode="my" />} />
                 </Route>
             </Route>
         </Routes>

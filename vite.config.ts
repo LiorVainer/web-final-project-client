@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import tsonfigpathes from 'vite-tsconfig-paths';
 
 export default defineConfig({
@@ -11,6 +11,7 @@ export default defineConfig({
                 changeOrigin: true,
             },
         },
+        port: 4000,
     },
     plugins: [react(), tsonfigpathes()],
     css: {},

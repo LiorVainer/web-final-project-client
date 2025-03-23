@@ -15,6 +15,7 @@ import { Screen } from '@components/Screen';
 import { AuthFormValidationRules } from '@pages/AuthPage/auth.validation.ts';
 import clsx from 'clsx';
 import { AuthFormAnimationVariants } from '@pages/AuthPage/auth.animations.ts';
+import { ROUTES } from '@/constants/routes.const';
 
 const { Text } = Typography;
 
@@ -49,7 +50,7 @@ export const AuthPage = () => {
             }
 
             handleAuthResponse(loginResponse);
-            navigate('/');
+            navigate(ROUTES.MATCH_EXPERIENCES);
         } catch (error) {
             console.error('Google login error', error);
             setErrorMessage('Google Login failed');
@@ -92,7 +93,7 @@ export const AuthPage = () => {
 
         if (response) {
             handleAuthResponse(response);
-            navigate('/');
+            navigate(ROUTES.MATCH_EXPERIENCES);
         }
     };
 
