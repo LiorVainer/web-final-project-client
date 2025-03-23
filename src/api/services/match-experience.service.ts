@@ -10,7 +10,7 @@ import {
 import { ROUTES } from '@/constants/routes.const';
 import { OkResponseSchema } from '@/models/response.model.ts';
 
-export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCE;
+export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCES;
 
 export const MatchExperienceService = {
     async getAllMatchExperience(page = 1, limit = 5, sortBy = 'date') {

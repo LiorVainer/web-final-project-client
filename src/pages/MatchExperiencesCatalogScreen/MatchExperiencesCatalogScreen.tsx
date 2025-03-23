@@ -77,47 +77,45 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
                         <div className={classes.loadingContainer}>
                             <Spin />
                         </div>
-                    ) : (
+                    ) : matchExperiences?.length ? (
                         <div className={classes.matchList}>
-                            {matchExperiences?.length ? (
-                                matchExperiences.map((matchExperience) => (
-                                    <div
-                                        className={classes.matchCardContainer}
-                                        onClick={() => navigate(`${ROUTES.MATCH_EXPERIENCE}/${matchExperience._id}`)}
-                                    >
-                                        {matchExperience.picture && (
-                                            <img
-                                                src={getPictureSrcUrl(matchExperience.picture)}
-                                                alt={matchExperience.title}
-                                                className={classes.image}
-                                            />
-                                        )}
-                                        <div className={classes.matchCardDetails} key={matchExperience._id}>
-                                            <div className={classes.test}>
-                                                <MatchDetails matchExperience={matchExperience} />
-                                                <div className={classes.rightSide}>
-                                                    <p className={classes.contentTime}>
-                                                        posted {moment(matchExperience.createdAt).fromNow()}
-                                                    </p>
-                                                    <div className={classes.userInteraction}>
-                                                        <div className={classes.likes}>
-                                                            <div>{matchExperience.likes.length} likes</div>
-                                                            <Heart size={15} />
-                                                        </div>
-                                                        <div className={classes.comments}>
-                                                            <div>{matchExperience.comments.length} comments</div>
-                                                            <MessageCircle size={15} />
-                                                        </div>
+                            {matchExperiences.map((matchExperience) => (
+                                <div
+                                    className={classes.matchCardContainer}
+                                    onClick={() => navigate(`${ROUTES.MATCH_EXPERIENCES}/${matchExperience._id}`)}
+                                >
+                                    {matchExperience.picture && (
+                                        <img
+                                            src={getPictureSrcUrl(matchExperience.picture)}
+                                            alt={matchExperience.title}
+                                            className={classes.image}
+                                        />
+                                    )}
+                                    <div className={classes.matchCardDetails} key={matchExperience._id}>
+                                        <div className={classes.test}>
+                                            <MatchDetails matchExperience={matchExperience} />
+                                            <div className={classes.rightSide}>
+                                                <p className={classes.contentTime}>
+                                                    posted {moment(matchExperience.createdAt).fromNow()}
+                                                </p>
+                                                <div className={classes.userInteraction}>
+                                                    <div className={classes.likes}>
+                                                        <div>{matchExperience.likes.length} likes</div>
+                                                        <Heart size={15} />
+                                                    </div>
+                                                    <div className={classes.comments}>
+                                                        <div>{matchExperience.comments.length} comments</div>
+                                                        <MessageCircle size={15} />
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                ))
-                            ) : (
-                                <div>No matchExperiences found.</div>
-                            )}
+                                </div>
+                            ))}
                         </div>
+                    ) : (
+                        <div className={classes.noMatchExperiences}>No Match Experiences were Found</div>
                     )}
                 </div>
                 <div className={classes.pagination}>

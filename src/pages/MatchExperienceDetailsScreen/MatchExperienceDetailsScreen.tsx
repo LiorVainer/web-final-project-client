@@ -15,7 +15,6 @@ import { LiveChatsSection } from '@components/LiveChatsSection';
 import { getPictureSrcUrl } from '@/utils/picture.utils.ts';
 import { XCircle } from 'lucide-react';
 import { QUERY_KEYS } from '@api/constants/query-keys.const.ts';
-import { areDatesInSameHour } from '@/utils/date.utils.ts';
 import { LoadingContainer } from '@components/LoadingContainer';
 import { useAuth } from '@/context/AuthContext.tsx';
 
