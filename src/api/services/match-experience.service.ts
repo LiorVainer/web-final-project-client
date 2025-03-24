@@ -30,7 +30,7 @@ export const MatchExperienceService = {
         }
     },
 
-    async getAllMatchExperiencesByUserId(userId: string | undefined, page = 1, limit = 5, sortBy = 'date') {
+    async getAllMatchExperiencesByUserId(userId: string | undefined, page = 1, limit = 6, sortBy = 'date') {
         try {
             if (!userId) return;
             const response = await axiosInstance.get(`${ROUTE_PREFIX}/user/${userId}`, {

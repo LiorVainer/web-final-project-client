@@ -21,7 +21,7 @@ export interface MatchExperiencesCatalogScreenProps {
     mode: 'all' | 'my';
 }
 
-const PageItemsLimit = 8;
+const PageItemsLimit = 6;
 
 export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogScreenProps) => {
     const [page, setPage] = useState(1);
