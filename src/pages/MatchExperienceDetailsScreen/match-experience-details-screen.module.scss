@@ -1,12 +1,13 @@
 @use '../../theme/theme' as *;
 
 .container {
-    padding-inline: 20rem;
+    padding-inline: 30rem;
     gap: 2rem;
     padding-block: 5rem;
 }
 
-.loadingContainer, .errorContainer {
+.loadingContainer,
+.errorContainer {
     @extend .container;
     display: flex;
     gap: 1.5rem;
@@ -60,7 +61,7 @@
 .image {
     height: 20rem;
     object-fit: cover;
-    border-radius: $system-border-radius
+    border-radius: $system-border-radius;
 }
 
 .headerRight {

@@ -1,5 +1,5 @@
 export const ROUTES = {
-    MATCH_EXPERIENCES: '/match-experiences',
+    MATCH_EXPERIENCES: '/catalog',
     MY_EXPERIENCES: '/my-experiences',
     AUTH: '/',
 };
