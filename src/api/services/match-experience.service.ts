@@ -7,13 +7,12 @@ import {
     MatchExperienceSchema,
     PaginatedMatchExperiencesSchema,
 } from '@/models/match-experience.model';
-import { ROUTES } from '@/constants/routes.const';
 import { OkResponseSchema } from '@/models/response.model.ts';
 
-export const ROUTE_PREFIX = ROUTES.MATCH_EXPERIENCES;
+export const ROUTE_PREFIX = 'match-experiences';
 
 export const MatchExperienceService = {
-    async getAllMatchExperience(page = 1, limit = 5, sortBy = 'date') {
+    async getAllMatchExperience(page = 1, limit = 8, sortBy = 'date') {
         try {
             const response = await axiosInstance.get(ROUTE_PREFIX, {
                 params: { page, limit, sortBy },
@@ -31,8 +30,9 @@ export const MatchExperienceService = {
         }
     },
 
-    async getAllMatchExperiencesByUserId(userId: string, page = 1, limit = 5, sortBy = 'date') {
+    async getAllMatchExperiencesByUserId(userId: string | undefined, page = 1, limit = 5, sortBy = 'date') {
         try {
+            if (!userId) return;
             const response = await axiosInstance.get(`${ROUTE_PREFIX}/user/${userId}`, {
                 params: { page, limit, sortBy },
             });

@@ -15,17 +15,18 @@ import { Heart, MessageCircle } from 'lucide-react';
 import { ROUTES } from '@/constants/routes.const';
 import { useNavigate } from 'react-router-dom';
 import { QUERY_KEYS } from '@/api/constants/query-keys.const';
+import { useAuth } from '@/context/AuthContext';
 
 export interface MatchExperiencesCatalogScreenProps {
     mode: 'all' | 'my';
 }
 
-const currentUserId = '67d58b363f1f3c317f54c7c3';
-const PageItemsLimit = 5;
+const PageItemsLimit = 8;
 
 export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogScreenProps) => {
     const [page, setPage] = useState(1);
     const [sortBy, setSortBy] = useState('date');
+    const { loggedInUser } = useAuth();
 
     const navigate = useNavigate();
 
@@ -38,11 +39,16 @@ export const MatchExperiencesCatalogScreen = ({ mode }: MatchExperiencesCatalogS
         queryKey:
             mode === 'all'
                 ? [QUERY_KEYS.MATCH_EXPERIENCES, page, sortBy]
-                : [QUERY_KEYS.USER_MATCH_EXPERIENCES, page, sortBy, currentUserId],
+                : [QUERY_KEYS.USER_MATCH_EXPERIENCES, page, sortBy, loggedInUser?._id],
         queryFn: () =>
             mode === 'all'
                 ? MatchExperienceService.getAllMatchExperience(page, PageItemsLimit, sortBy)
-                : MatchExperienceService.getAllMatchExperiencesByUserId(currentUserId, page, PageItemsLimit, sortBy),
+                : MatchExperienceService.getAllMatchExperiencesByUserId(
+                      loggedInUser?._id,
+                      page,
+                      PageItemsLimit,
+                      sortBy
+                  ),
     });
 
     const totalPages = matchExperiencesData?.totalPages || 1;
