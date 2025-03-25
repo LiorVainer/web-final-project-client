@@ -18,34 +18,29 @@ export const LiveChatsSection = ({ matchExperienceId, onChatClick }: LiveChatsSe
 
     //TODO make sure actual image is displayed
 
-    return (
+    return liveChats && liveChats.length > 0 ? (
         <div className={classes.liveChatsSection}>
             <h4>Live Chats</h4>
             <div className={classes.liveChatsList}>
-                {liveChats &&
-                    liveChats.length > 0 &&
-                    liveChats.map((chat) => (
-                        <div key={chat._id} className={classes.chatItem} onClick={() => onChatClick(chat.visitor._id)}>
-                            <div className={classes.chatInfo}>
-                                <div className={classes.chatUserInfo}>
-                                    <img
-                                        className={classes.chatUserInage}
-                                        src={getPictureSrcUrl(chat.visitor.picture)}
-                                    />
-                                    <p className={classes.chatUser}>{chat.visitor.username}</p>
-                                </div>
-                                <div className={classes.chatTimestamps}>
-                                    <span className={classes.chatUpdatedAt}>
-                                        Last Update: {moment(chat.updatedAt).fromNow()}
-                                    </span>
-                                    <span className={classes.chatCreatedAt}>
-                                        Created: {moment(chat.createdAt).format('MMM D, YYYY hh:mm')}
-                                    </span>
-                                </div>
+                {liveChats.map((chat) => (
+                    <div key={chat._id} className={classes.chatItem} onClick={() => onChatClick(chat.visitor._id)}>
+                        <div className={classes.chatInfo}>
+                            <div className={classes.chatUserInfo}>
+                                <img className={classes.chatUserInage} src={getPictureSrcUrl(chat.visitor.picture)} />
+                                <p className={classes.chatUser}>{chat.visitor.username}</p>
+                            </div>
+                            <div className={classes.chatTimestamps}>
+                                <span className={classes.chatUpdatedAt}>
+                                    Last Update: {moment(chat.updatedAt).fromNow()}
+                                </span>
+                                <span className={classes.chatCreatedAt}>
+                                    Created: {moment(chat.createdAt).format('MMM D, YYYY hh:mm')}
+                                </span>
                             </div>
                         </div>
-                    ))}
+                    </div>
+                ))}
             </div>
         </div>
-    );
+    ) : null;
 };
