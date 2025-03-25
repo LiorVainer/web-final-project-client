@@ -7,7 +7,7 @@ export interface MatchDetailsProps {
     matchExperience: MatchExperience;
 }
 
-const MAX_TEAM_NAME_LENGTH = 14;
+const MAX_TEAM_NAME_LENGTH = 20;
 const displayTeamName = (teamName: string) => {
     if (teamName.length > MAX_TEAM_NAME_LENGTH) {
         return `${teamName.slice(0, MAX_TEAM_NAME_LENGTH)}...`;

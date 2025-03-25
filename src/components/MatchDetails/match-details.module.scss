@@ -8,9 +8,9 @@
     border-left: gray-scale(80%) 1px solid;
 
     h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
     }
 }
 
@@ -19,44 +19,43 @@
     flex-direction: column;
     gap: 1rem;
     h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
     }
 }
-
 
 .matchMeta {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     color: gray-scale(10%);
+    font-size: 0.9rem;
 
     div {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
 
-      svg {
-        color: $action;
-
-      }
+        svg {
+            color: $action;
+        }
     }
 }
 
 .teams {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1rem;
 
-  span {
-    font-weight: 600;
-    &:nth-child(2) {
-      color: gray-scale(50%);
-      font-size: 1.2rem;
-      font-weight: 400;
-      font-style: italic;
+    span {
+        font-weight: 600;
+        &:nth-child(2) {
+            color: gray-scale(50%);
+            font-size: 1rem;
+            font-weight: 400;
+            font-style: italic;
+        }
     }
-  }
 }
